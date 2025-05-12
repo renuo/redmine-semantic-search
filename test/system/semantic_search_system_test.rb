@@ -29,7 +29,7 @@ class SemanticSearchSystemTest < ApplicationSystemTestCase
 
     EmbeddingService.any_instance.stubs(:generate_embedding).returns([0.1] * 1536)
 
-    mock_result = [{
+    @mock_result = [{
       "issue_id" => @issue.id,
       "subject" => @issue.subject,
       "description" => @issue.description,
@@ -44,7 +44,8 @@ class SemanticSearchSystemTest < ApplicationSystemTestCase
       "assigned_to_name" => nil,
       "similarity_score" => 0.95
     }]
-    SemanticSearchService.any_instance.stubs(:search).returns(mock_result)
+
+    SemanticSearchService.any_instance.stubs(:search).returns(@mock_result)
 
     log_user(@user.login, 'jsmith')
   end
@@ -66,7 +67,7 @@ class SemanticSearchSystemTest < ApplicationSystemTestCase
       click_button 'Search'
     end
 
-    assert_selector 'dl#search-results-list'
+    assert_selector 'dl#search-results-list', wait: 5
 
     assert_selector "dt a[href='/issues/#{@issue.id}']"
 
