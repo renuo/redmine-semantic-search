@@ -3,5 +3,5 @@ pandas==2.2.0
 psycopg2-binary==2.9.9
 numpy==1.26.3
 plotly==5.18.0
-scikit-learn==1.4.0
+scikit-learn==1.5.1
 python-dotenv==1.0.1
