@@ -77,8 +77,7 @@ class SemanticSearchSystemTest < ApplicationSystemTestCase
   end
 
   test "semantic search with empty results" do
-    IssueEmbedding.delete_all
-
+    SemanticSearchService.any_instance.unstub(:search)
     SemanticSearchService.any_instance.stubs(:search).returns([])
 
     visit '/semantic_search'
