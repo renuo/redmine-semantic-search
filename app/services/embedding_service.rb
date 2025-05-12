@@ -62,7 +62,7 @@ class EmbeddingService
 
   def api_key
     key = ENV.fetch("OPENAI_API_KEY", nil)
-    raise EmbeddingError, "OpenAI API key not found. Please set OPENAI_API_KEY environment variable." if key.blank?
+    raise EmbeddingError, I18n.t("error_openai_api_key_required") if key.blank?
 
     key
   end
