@@ -1,16 +1,26 @@
 require File.expand_path('../../application_system_test_case', __FILE__)
 
 class SemanticSearchSystemTest < ApplicationSystemTestCase
-  fixtures :projects, :users, :roles, :members, :member_roles, :issues, :trackers
+  fixtures :projects, :users, :roles, :members, :member_roles, :trackers
 
   def setup
-    @user = User.find(2)
-    @role = Role.find(1)
+    @user = User.find_by(login: 'jsmith') || users(:users_002)
+    @role = Role.find_by(name: 'Manager') || roles(:roles_001)
     @role.add_permission!(:use_semantic_search)
 
     ENV['OPENAI_API_KEY'] = 'test_api_key'
 
-    @issue = Issue.find(1)
+    @project = Project.find_by(identifier: 'ecookbook') || projects(:projects_001)
+    @tracker = Tracker.first
+
+    @issue = Issue.create!(
+      project: @project,
+      tracker: @tracker,
+      author: @user,
+      subject: 'Test issue for semantic search',
+      description: 'This is a test issue created for semantic search testing'
+    )
+
     @embedding = IssueEmbedding.create!(
       issue: @issue,
       embedding_vector: [0.1] * 1536,
@@ -24,6 +34,8 @@ class SemanticSearchSystemTest < ApplicationSystemTestCase
 
   def teardown
     ENV.delete('OPENAI_API_KEY')
+    @embedding.destroy if @embedding && IssueEmbedding.exists?(@embedding.id)
+    @issue.destroy if @issue && Issue.exists?(@issue.id)
   end
 
   test "semantic search end-to-end happy path" do
