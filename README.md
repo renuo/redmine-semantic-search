@@ -1,5 +1,8 @@
 # Semantic Search Plugin for Redmine
 
+[![CI](https://github.com/renuo/redmine_semantic_search/actions/workflows/ci.yml/badge.svg)](https://github.com/renuo/redmine_semantic_search/actions/workflows/ci.yml)
+[![Tests](https://github.com/renuo/redmine_semantic_search/actions/workflows/test.yml/badge.svg)](https://github.com/renuo/redmine_semantic_search/actions/workflows/test.yml)
+
 This Redmine plugin enables AI-based semantic search functionality using OpenAI embeddings and PostgreSQL's pgvector extension. It allows users to search for tickets using natural language queries rather than exact keyword matches.
 
 ## Features
@@ -135,6 +138,29 @@ The tests are written with MiniTest, the default testing framework for Ruby on R
 ```bash
 bundle exec rake redmine:plugins:test NAME=semantic_search
 ```
+
+## Linting
+
+In order to lint the application, run the following command:
+
+```bash
+bin/lint
+```
+
+## Continuous Integration
+
+This project uses GitHub Actions for continuous integration and testing:
+
+- **CI Workflow**: Runs linting and syntax checks on every push and pull request
+- **Test Workflow**: Sets up a complete Redmine environment and runs all plugin tests
+
+To run the workflows locally, you can use [act](https://github.com/nektos/act).
+
+### GitHub Secrets
+
+The test workflow requires the following GitHub secret to be configured:
+
+- `OPENAI_API_KEY`: A valid OpenAI API key for testing embedding functionality
 
 ## License
 

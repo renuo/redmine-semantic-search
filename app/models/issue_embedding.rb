@@ -12,9 +12,9 @@ class IssueEmbedding < ActiveRecord::Base
     content = [
       issue.subject,
       issue.description,
-      issue.journals.map { |j| j.notes if j.notes.present? }.compact.join(' '),
-      issue.time_entries.map { |te| te.comments if te.comments.present? }.compact.join(' ')
-    ].join(' ')
+      issue.journals.map { |j| j.notes if j.notes.present? }.compact.join(" "),
+      issue.time_entries.map { |te| te.comments if te.comments.present? }.compact.join(" ")
+    ].join(" ")
 
     Digest::SHA256.hexdigest(content)
   end

@@ -1,0 +1,19 @@
+#!/usr/bin/env bash
+#
+# Run Rubocop with proper parameters to match CI environment
+# Usage: bin/lint [additional_rubocop_options]
+
+set -e
+
+echo "Running Rubocop linter..."
+rubocop --ignore-parent-exclusion --force-exclusion app/ Gemfile $@
+
+exit_code=$?
+
+if [ $exit_code -eq 0 ]; then
+  echo "✅ Linting passed!"
+else
+  echo "❌ Linting failed. Please fix the issues before committing."
+fi
+
+exit $exit_code

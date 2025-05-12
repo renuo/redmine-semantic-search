@@ -14,10 +14,10 @@ class SemanticSearchController < ApplicationController
       @results = search_service.search(@question, User.current, search_limit)
     end
 
-    render layout: 'base'
+    render layout: "base"
   rescue EmbeddingService::EmbeddingError => e
     flash.now[:error] = e.message
-    render layout: 'base'
+    render layout: "base"
   end
 
   def settings
@@ -33,7 +33,7 @@ class SemanticSearchController < ApplicationController
       SyncEmbeddingsJob.perform_later
     end
 
-    redirect_to action: 'settings'
+    redirect_to action: "settings"
   end
 
   def sync_embeddings
@@ -42,7 +42,7 @@ class SemanticSearchController < ApplicationController
     SyncEmbeddingsJob.perform_later
 
     flash[:notice] = l(:notice_sync_embeddings_started, count: issue_count)
-    redirect_back(fallback_location: { controller: 'issues', action: 'index' })
+    redirect_back(fallback_location: { controller: "issues", action: "index" })
   end
 
   private

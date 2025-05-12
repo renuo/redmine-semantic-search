@@ -36,9 +36,20 @@ class IssueEmbeddingTest < ActiveSupport::TestCase
 
   def test_calculate_content_hash
     issue = Issue.find(1)
+
+    default_priority = IssuePriority.find_by(name: 'Normal') || IssuePriority.create!(name: 'Normal', position: 1)
+    issue.priority_id = default_priority.id
+
+    if issue.project
+      default_category = issue.project.issue_categories.first || issue.project.issue_categories.create!(name: 'Default Category')
+      issue.category_id = default_category.id
+    end
+
     issue.update_columns(
       subject: 'Test subject',
-      description: 'Test description'
+      description: 'Test description',
+      priority_id: issue.priority_id,
+      category_id: issue.category_id
     )
 
     journal = Journal.create!(
@@ -69,6 +80,14 @@ class IssueEmbeddingTest < ActiveSupport::TestCase
 
   def test_needs_update
     issue = Issue.find(1)
+
+    default_priority = IssuePriority.find_by(name: 'Normal') || IssuePriority.create!(name: 'Normal', position: 1)
+    issue.priority_id = default_priority.id
+
+    if issue.project
+      default_category = issue.project.issue_categories.first || issue.project.issue_categories.create!(name: 'Default Category')
+      issue.category_id = default_category.id
+    end
 
     current_hash = IssueEmbedding.calculate_content_hash(issue)
     embedding = IssueEmbedding.create!(

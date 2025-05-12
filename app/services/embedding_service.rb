@@ -1,4 +1,4 @@
-require 'ruby/openai'
+require "ruby/openai"
 
 class EmbeddingService
   class EmbeddingError < StandardError; end
@@ -19,8 +19,8 @@ class EmbeddingService
     )
 
     if response["error"]
-      Rails.logger.error("OpenAI API error: #{response["error"]}")
-      raise EmbeddingError, "Failed to generate embedding: #{response["error"]["message"]}"
+      Rails.logger.error("OpenAI API error: #{response['error']}")
+      raise EmbeddingError, "Failed to generate embedding: #{response['error']['message']}"
     end
 
     pad_embedding(response.dig("data", 0, "embedding"))
@@ -35,17 +35,18 @@ class EmbeddingService
     vector + Array.new(MAX_DIMENSION - vector.length, 0.0)
   end
 
-
   def model_dimensions
     # we have different vector sizes for different models
     case embedding_model
-    when "text-embedding-ada-002" #openai
-      1536
-    when "nomic-embed-text" #ollama
+    when "nomic-embed-text" # ollama
       768
+    when "text-embedding-ada-002" # openai
+      1536
+    # rubocop:disable Lint/DuplicateBranch
     else
       1536
     end
+    # rubocop:enable Lint/DuplicateBranch
   end
 
   def prepare_issue_content(issue)
@@ -60,16 +61,17 @@ class EmbeddingService
   private
 
   def api_key
-    key = ENV['OPENAI_API_KEY']
+    key = ENV.fetch("OPENAI_API_KEY", nil)
     raise EmbeddingError, "OpenAI API key not found. Please set OPENAI_API_KEY environment variable." if key.blank?
+
     key
   end
 
   def base_url
-    Setting.plugin_semantic_search['base_url'] || "https://api.openai.com/v1"
+    Setting.plugin_semantic_search["base_url"] || "https://api.openai.com/v1"
   end
 
   def embedding_model
-    Setting.plugin_semantic_search['embedding_model'] || "text-embedding-ada-002"
+    Setting.plugin_semantic_search["embedding_model"] || "text-embedding-ada-002"
   end
 end

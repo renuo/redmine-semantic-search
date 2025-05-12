@@ -23,7 +23,7 @@ class IssueEmbeddingJob < ActiveJob::Base
       embedding.save!
 
       Rails.logger.info("=> [SEMANTIC_SEARCH] Successfully generated embedding for Issue ##{issue_id}")
-    rescue => e
+    rescue StandardError => e
       Rails.logger.error("=> [SEMANTIC_SEARCH] Failed to generate embedding for Issue ##{issue_id}: #{e.message}")
       raise e
     end

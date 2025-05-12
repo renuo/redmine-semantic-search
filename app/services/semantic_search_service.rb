@@ -5,9 +5,20 @@ class SemanticSearchService
 
   def search(query, user, limit = 10)
     query_embedding = @embedding_service.generate_embedding(query)
+    results = fetch_raw_results(query_embedding, limit)
+    processed_results = process_results(results)
+    filter_by_visibility(processed_results, user)
+  end
 
-    # euclidean distance / less distance = more similar
-    sql = <<-SQL
+  private
+
+  def fetch_raw_results(query_embedding, limit)
+    sql = build_search_sql(query_embedding, limit)
+    ActiveRecord::Base.connection.execute(sql)
+  end
+
+  def build_search_sql(query_embedding, limit)
+    <<-SQL
       SELECT issue_embeddings.issue_id,
              issues.subject,
              issues.description,
@@ -37,33 +48,52 @@ class SemanticSearchService
       ORDER BY distance ASC
       LIMIT #{limit}
     SQL
+  end
 
-    results = ActiveRecord::Base.connection.execute(sql)
-
-    processed_results = results.map do |result|
-      result['author_name'] = [result['author_firstname'], result['author_lastname']].join(' ').strip
-      result['author_name'] = result['author_login'] if result['author_name'].blank?
-
-      if result['assigned_to_firstname'] || result['assigned_to_lastname'] || result['assigned_to_login']
-        result['assigned_to_name'] = [result['assigned_to_firstname'], result['assigned_to_lastname']].join(' ').strip
-        result['assigned_to_name'] = result['assigned_to_login'] if result['assigned_to_name'].blank?
-      else
-        result['assigned_to_name'] = nil
-      end
-
-      distance = result['distance'].to_f
-      result['similarity_score'] = 1.0 / (1.0 + distance)
-
-      %w[author_firstname author_lastname author_login assigned_to_firstname assigned_to_lastname assigned_to_login distance].each do |key|
-        result.delete(key)
-      end
-      result
+  def process_results(results)
+    results.map do |result|
+      result = process_author_info(result)
+      result = process_assignee_info(result)
+      result = calculate_similarity_score(result)
+      remove_temporary_fields(result)
     end
+  end
 
-    issue_ids = processed_results.map { |r| r['issue_id'] }
+  def process_author_info(result)
+    result["author_name"] = [result["author_firstname"], result["author_lastname"]].join(" ").strip
+    result["author_name"] = result["author_login"] if result["author_name"].blank?
+    result
+  end
+
+  def process_assignee_info(result)
+    if result["assigned_to_firstname"] || result["assigned_to_lastname"] || result["assigned_to_login"]
+      result["assigned_to_name"] = [result["assigned_to_firstname"], result["assigned_to_lastname"]].join(" ").strip
+      result["assigned_to_name"] = result["assigned_to_login"] if result["assigned_to_name"].blank?
+    else
+      result["assigned_to_name"] = nil
+    end
+    result
+  end
+
+  def calculate_similarity_score(result)
+    distance = result["distance"].to_f
+    result["similarity_score"] = 1.0 / (1.0 + distance)
+    result
+  end
+
+  def remove_temporary_fields(result)
+    %w[author_firstname author_lastname author_login assigned_to_firstname assigned_to_lastname assigned_to_login
+       distance].each do |key|
+      result.delete(key)
+    end
+    result
+  end
+
+  def filter_by_visibility(processed_results, user)
+    issue_ids = processed_results.map { |r| r["issue_id"] }
     visible_issues = Issue.where(id: issue_ids).visible(user)
     visible_issue_ids = visible_issues.pluck(:id).map(&:to_s)
 
-    processed_results.select { |r| visible_issue_ids.include?(r['issue_id'].to_s) }
+    processed_results.select { |r| visible_issue_ids.include?(r["issue_id"].to_s) }
   end
 end
