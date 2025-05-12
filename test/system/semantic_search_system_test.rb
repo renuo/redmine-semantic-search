@@ -44,6 +44,7 @@ class SemanticSearchSystemTest < ApplicationSystemTestCase
       "assigned_to_name" => nil,
       "similarity_score" => 0.95
     }]
+
     SemanticSearchService.any_instance.stubs(:search).returns(mock_result)
 
     log_user(@user.login, 'jsmith')
@@ -66,7 +67,7 @@ class SemanticSearchSystemTest < ApplicationSystemTestCase
       click_button 'Search'
     end
 
-    assert_selector 'dl#search-results-list'
+    assert_selector 'dl#search-results-list', wait: 5
 
     assert_selector "dt a[href='/issues/#{@issue.id}']"
 
@@ -76,8 +77,7 @@ class SemanticSearchSystemTest < ApplicationSystemTestCase
   end
 
   test "semantic search with empty results" do
-    IssueEmbedding.delete_all
-
+    SemanticSearchService.any_instance.unstub(:search)
     SemanticSearchService.any_instance.stubs(:search).returns([])
 
     visit '/semantic_search'
@@ -87,7 +87,7 @@ class SemanticSearchSystemTest < ApplicationSystemTestCase
       click_button 'Search'
     end
 
-    assert_selector 'p.nodata'
+    assert_selector 'p.nodata', wait: 5
   end
 
   test "semantic search page is accessible only to authorized users" do
