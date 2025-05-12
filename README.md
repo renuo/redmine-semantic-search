@@ -160,7 +160,7 @@ To run the workflows locally, you can use [act](https://github.com/nektos/act).
 
 The test workflow requires the following GitHub secret to be configured:
 
-- `OPENAI_API_KEY`: A valid OpenAI API key for testing embedding functionality
+- `OPENAI_API_KEY`: A random string of characters. It does not have to be a valid OpenAI API Key.
 
 ## License
 
