@@ -2,9 +2,7 @@ name: Run Tests
 
 on:
   push:
-    branches: [main, master]
   pull_request:
-    branches: [main, master]
   workflow_dispatch:
 
 jobs:
@@ -52,6 +50,7 @@ jobs:
         uses: actions/checkout@v4
         with:
           path: redmine/plugins/semantic_search
+          ref: ${{ github.head_ref || github.ref_name }}
 
       - name: Set up Ruby
         uses: ruby/setup-ruby@v1
