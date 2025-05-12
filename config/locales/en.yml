@@ -34,3 +34,5 @@ en:
 
   project_module_semantic_search: "Semantic Search"
   permission_use_semantic_search: "Use semantic search"
+
+  error_openai_api_key_required: "OpenAI API key not found. Please set OPENAI_API_KEY environment variable."
