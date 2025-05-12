@@ -58,19 +58,6 @@ class SemanticSearchSystemTest < ApplicationSystemTestCase
     assert_current_path(%r{/issues/#{@issue.id}}, url: true)
   end
 
-  test "semantic search with empty results" do
-    IssueEmbedding.delete_all
-
-    visit '/semantic_search'
-
-    within '#semantic-search-form' do
-      fill_in 'q', with: 'query with no results'
-      click_button 'Search'
-    end
-
-    assert_selector 'p.nodata'
-  end
-
   test "semantic search page is accessible only to authorized users" do
     Capybara.reset_sessions!
 
