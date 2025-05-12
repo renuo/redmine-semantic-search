@@ -13,6 +13,10 @@ This Redmine plugin enables AI-based semantic search functionality using OpenAI 
 - Role-based access control (Developer and Manager roles)
 - Compatible with Redmine 5.1.x and 6.0.x
 
+## Domain Model
+
+For the rendered Mermaid Domain Model, have a look at [this file](repo/domain_model.md).
+
 ## Requirements
 
 - Redmine 5.1.x or 6.0.x
