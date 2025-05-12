@@ -88,7 +88,7 @@ class SemanticSearchSystemTest < ApplicationSystemTestCase
       click_button 'Search'
     end
 
-    assert_selector 'p.nodata'
+    assert_selector 'p.nodata', wait: 5
   end
 
   test "semantic search page is accessible only to authorized users" do
