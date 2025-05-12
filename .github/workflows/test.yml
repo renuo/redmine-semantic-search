@@ -53,12 +53,6 @@ jobs:
         with:
           path: redmine/plugins/semantic_search
 
-      - name: Checkout redmine_sample_data plugin
-        uses: actions/checkout@v4
-        with:
-          repository: alexandermeindl/redmine_sample_data
-          path: redmine/plugins/redmine_sample_data
-
       - name: Set up Ruby
         uses: ruby/setup-ruby@v1
         with:
@@ -113,7 +107,6 @@ jobs:
           RAILS_ENV=test bundle exec rake db:migrate
           RAILS_ENV=test bundle exec rake redmine:load_default_data REDMINE_LANG=en
           RAILS_ENV=test bundle exec rake redmine:plugins:migrate
-          RAILS_ENV=test bundle exec rake redmine:sample_data
 
       - name: Enable pgvector extension
         run: |
