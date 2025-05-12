@@ -29,6 +29,23 @@ class SemanticSearchSystemTest < ApplicationSystemTestCase
 
     EmbeddingService.any_instance.stubs(:generate_embedding).returns([0.1] * 1536)
 
+    mock_result = [{
+      "issue_id" => @issue.id,
+      "subject" => @issue.subject,
+      "description" => @issue.description,
+      "project_name" => @project.name,
+      "created_on" => @issue.created_on,
+      "updated_on" => @issue.updated_on,
+      "tracker_id" => @tracker.id,
+      "tracker_name" => @tracker.name,
+      "status_name" => @issue.status.name,
+      "priority_name" => @issue.priority.name,
+      "author_name" => @user.name,
+      "assigned_to_name" => nil,
+      "similarity_score" => 0.95
+    }]
+    SemanticSearchService.any_instance.stubs(:search).returns(mock_result)
+
     log_user(@user.login, 'jsmith')
   end
 
@@ -60,6 +77,8 @@ class SemanticSearchSystemTest < ApplicationSystemTestCase
 
   test "semantic search with empty results" do
     IssueEmbedding.delete_all
+
+    SemanticSearchService.any_instance.stubs(:search).returns([])
 
     visit '/semantic_search'
 
