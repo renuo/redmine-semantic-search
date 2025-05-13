@@ -13,6 +13,9 @@ class SemanticSearchSystemTest < ApplicationSystemTestCase
     @project = Project.find_by(identifier: 'ecookbook') || projects(:projects_001)
     @tracker = Tracker.first
 
+    # Destroy any existing test issues with the same subject to ensure a clean test environment
+    Issue.where(subject: 'Test issue for semantic search').destroy_all
+
     @issue = Issue.create!(
       project: @project,
       tracker: @tracker,
@@ -20,6 +23,9 @@ class SemanticSearchSystemTest < ApplicationSystemTestCase
       subject: 'Test issue for semantic search',
       description: 'This is a test issue created for semantic search testing'
     )
+
+    # Ensure any existing embeddings are removed
+    IssueEmbedding.where(issue_id: @issue.id).destroy_all
 
     @embedding = IssueEmbedding.create!(
       issue: @issue,
@@ -58,9 +64,18 @@ class SemanticSearchSystemTest < ApplicationSystemTestCase
 
   def teardown
     ENV.delete('OPENAI_API_KEY')
+
+    # Clean up any stubs
+    SemanticSearchService.any_instance.unstub(:search) if SemanticSearchService.any_instance.respond_to?(:search)
+    EmbeddingService.any_instance.unstub(:generate_embedding)
+    SemanticSearchController.any_instance.unstub(:check_if_enabled)
+
+    # Clean up test data
     @embedding.destroy if @embedding && IssueEmbedding.exists?(@embedding.id)
     @issue.destroy if @issue && Issue.exists?(@issue.id)
-    SemanticSearchController.any_instance.unstub(:check_if_enabled)
+
+    # Ensure browser is reset
+    Capybara.reset_sessions!
   end
 
   test "semantic search end-to-end happy path" do
@@ -91,12 +106,19 @@ class SemanticSearchSystemTest < ApplicationSystemTestCase
 
     visit '/semantic_search'
 
+    # Ensure page is loaded
+    assert_selector '#semantic-search-form', wait: 5
+
     within '#semantic-search-form' do
       fill_in 'q', with: 'query with no results'
       click_button 'Search'
     end
 
-    assert_selector 'p.nodata', wait: 5
+    # Wait for the search to complete and check for empty results message
+    using_wait_time 10 do
+      assert_selector '#search-results'
+      assert_selector 'p.nodata', text: I18n.t(:label_no_data)
+    end
   end
 
   test "semantic search page is accessible only to authorized users" do
