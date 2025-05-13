@@ -13,7 +13,7 @@ class ApplicationSystemTestCase < ActionDispatch::SystemTestCase
     visit '/login'
     fill_in 'username', with: login
     fill_in 'password', with: password
-    click_button 'Login'
+    click_button 'Login', wait: 5
     assert_selector '#loggedas'
   end
 
