@@ -14,20 +14,30 @@ class ApplicationSystemTestCase < ActionDispatch::SystemTestCase
     Capybara.reset_sessions!
 
     visit '/login'
-    assert_selector 'form#login-form', wait: 5
 
-    # Debug the login form
+    # Take a screenshot of the login page for debugging
+    path = Rails.root.join('tmp/screenshots', "login_page_#{login}_#{Time.now.to_i}.png")
+    page.save_screenshot(path)
+    puts "Login page screenshot saved to: #{path}"
+    puts "Login page URL: #{current_url}"
+
+    # Debug the form structure
+    puts "Form elements on page: #{page.all('form').map { |f| f[:id] || 'no-id' }.join(', ')}"
+
+    # Wait for login page to load, without checking for a specific form ID
+    assert_selector 'input[name=username]', wait: 5
+    assert_selector 'input[name=password]', wait: 5
+
     puts "--- Attempting login for user: '#{login}' ---"
 
     fill_in 'username', with: login
     fill_in 'password', with: password
 
-    # Take screenshot before login for debugging
-    path = Rails.root.join('tmp/screenshots', "debug_login_#{login}_#{Time.now.to_i}.png")
-    page.save_screenshot(path)
-    puts "Screenshot saved to: #{path}"
+    # Find the login button without relying on specific text
+    login_button = find('input[type=submit], button[type=submit]')
+    puts "Found login button: #{login_button.value || login_button.text}"
 
-    click_button 'Login'
+    login_button.click
 
     # Wait for login to complete
     begin
