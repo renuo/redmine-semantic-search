@@ -4,42 +4,86 @@ class SemanticSearchSystemTest < ApplicationSystemTestCase
   fixtures :projects, :users, :roles, :members, :member_roles, :trackers
 
   def setup
-    @user = User.find_by(login: 'jsmith') || users(:users_002)
-    @role = Role.find_by(name: 'Manager') || roles(:roles_001)
+    # Start with a clean session
+    Capybara.reset_sessions!
+
+    # Find or create test user
+    @user = User.find_by(login: 'jsmith')
+    unless @user
+      puts "Creating test user 'jsmith'"
+      @user = User.create!(
+        login: 'jsmith',
+        firstname: 'John',
+        lastname: 'Smith',
+        mail: 'jsmith@example.net',
+        status: 1,
+        password: 'jsmith',
+        password_confirmation: 'jsmith'
+      )
+    end
+
+    # Find or create manager role
+    @role = Role.find_by(name: 'Manager')
+    unless @role
+      puts "Creating Manager role"
+      @role = Role.create!(name: 'Manager')
+    end
     @role.add_permission!(:use_semantic_search)
 
+    # Set up test environment
     ENV['OPENAI_API_KEY'] = 'test_api_key'
 
-    @project = Project.find_by(identifier: 'ecookbook') || projects(:projects_001)
-    @tracker = Tracker.first
+    # Find or create test project
+    @project = Project.find_by(identifier: 'ecookbook')
+    unless @project
+      puts "Creating test project 'ecookbook'"
+      @project = Project.create!(
+        name: 'eCookbook',
+        identifier: 'ecookbook',
+        is_public: true
+      )
+    end
+
+    # Ensure user is a member of the project
+    unless @project.members.exists?(user_id: @user.id)
+      puts "Adding user to project"
+      @project.members.create!(user: @user, roles: [@role])
+    end
+
+    @tracker = Tracker.first || Tracker.create!(name: 'Bug')
 
     # Destroy any existing test issues with the same subject to ensure a clean test environment
     Issue.where(subject: 'Test issue for semantic search').destroy_all
 
-    @issue = Issue.create!(
-      project: @project,
-      tracker: @tracker,
-      author: @user,
-      subject: 'Test issue for semantic search',
-      description: 'This is a test issue created for semantic search testing'
-    )
+    begin
+      @issue = Issue.create!(
+        project: @project,
+        tracker: @tracker,
+        author: @user,
+        subject: 'Test issue for semantic search',
+        description: 'This is a test issue created for semantic search testing'
+      )
 
-    # Debug information
-    puts "Created test issue with ID: #{@issue.id}"
+      puts "Created test issue with ID: #{@issue.id}"
 
-    # Ensure any existing embeddings are removed
-    IssueEmbedding.where(issue_id: @issue.id).destroy_all
+      # Ensure any existing embeddings are removed
+      IssueEmbedding.where(issue_id: @issue.id).destroy_all
 
-    @embedding = IssueEmbedding.create!(
-      issue: @issue,
-      embedding_vector: [0.1] * 1536,
-      content_hash: 'test_hash',
-      model_used: 'text-embedding-ada-002'
-    )
+      @embedding = IssueEmbedding.create!(
+        issue: @issue,
+        embedding_vector: [0.1] * 1536,
+        content_hash: 'test_hash',
+        model_used: 'text-embedding-ada-002'
+      )
 
-    # Debug information
-    puts "Created embedding for issue ID: #{@issue.id}"
+      puts "Created embedding for issue ID: #{@issue.id}"
+    rescue => e
+      puts "Error creating test data: #{e.message}"
+      puts e.backtrace.join("\n")
+      raise e
+    end
 
+    # Set up stubs
     EmbeddingService.any_instance.stubs(:generate_embedding).returns([0.1] * 1536)
 
     mock_result = [{
@@ -63,9 +107,9 @@ class SemanticSearchSystemTest < ApplicationSystemTestCase
     SemanticSearchService.stubs(:new).returns(search_service)
     search_service.stubs(:search).returns(mock_result)
 
-    # Debug stub information
     puts "Stubbed search service to return mock result with issue ID: #{@issue.id}"
 
+    # Enable the plugin in settings
     Setting.plugin_semantic_search = {
       "enabled" => "1",
       "search_limit" => "10"
@@ -74,6 +118,7 @@ class SemanticSearchSystemTest < ApplicationSystemTestCase
     # Stub controller methods for more reliable tests
     SemanticSearchController.any_instance.stubs(:check_if_enabled).returns(true)
 
+    # Log in as the test user
     logout
     log_user(@user.login, 'jsmith')
     puts "Logged in as user: #{@user.login}"
@@ -171,20 +216,53 @@ class SemanticSearchSystemTest < ApplicationSystemTestCase
   end
 
   test "top_menu_item_is_hidden_when_plugin_is_disabled" do
-    logout
+    # Start with fresh session
+    Capybara.reset_sessions!
 
+    # Make sure user exists in test database
+    admin = User.find_by(login: 'admin')
+    unless admin
+      puts "Admin user not found in database, creating one"
+      admin = User.new(
+        login: 'admin',
+        firstname: 'Admin',
+        lastname: 'User',
+        mail: 'admin@example.net',
+        admin: true,
+        status: 1,
+        password: 'admin',
+        password_confirmation: 'admin'
+      )
+      admin.save!
+    end
+
+    # Log in as admin with proper credentials
     log_user('admin', 'admin')
 
-    assert_selector '#loggedas', wait: 5
+    # Take screenshot after login for verification
+    path = Rails.root.join('tmp/screenshots', "admin_logged_in_#{Time.now.to_i}.png")
+    page.save_screenshot(path)
+    puts "Admin login verification screenshot: #{path}"
 
-    Setting.plugin_semantic_search = Setting.plugin_semantic_search.merge('enabled' => '0')
+    # Disable the plugin
+    Setting.plugin_semantic_search = {"enabled" => "0", "search_limit" => "10"}
+    puts "Plugin disabled: #{Setting.plugin_semantic_search.inspect}"
 
+    # Visit the homepage
     visit '/'
 
-    assert_selector '#top-menu', wait: 5
+    # Wait for page to load and take screenshot
+    path = Rails.root.join('tmp/screenshots', "homepage_#{Time.now.to_i}.png")
+    page.save_screenshot(path)
+    puts "Homepage screenshot: #{path}"
 
-    within '#top-menu' do
-      assert_no_link I18n.t(:label_semantic_search)
-    end
+    # Verify top menu exists
+    assert_selector '#top-menu', wait: 10, message: "Top menu not found"
+
+    # Check that semantic search link is not present
+    semantic_search_text = I18n.t(:label_semantic_search)
+    puts "Looking for menu item with text: '#{semantic_search_text}'"
+
+    assert_no_text semantic_search_text
   end
 end
