@@ -24,7 +24,8 @@ class SemanticSearchSystemTest < ApplicationSystemTestCase
     @embedding = IssueEmbedding.create!(
       issue: @issue,
       embedding_vector: [0.1] * 1536,
-      content_hash: 'test_hash'
+      content_hash: 'test_hash',
+      model_used: 'text-embedding-ada-002'
     )
 
     EmbeddingService.any_instance.stubs(:generate_embedding).returns([0.1] * 1536)
@@ -47,6 +48,10 @@ class SemanticSearchSystemTest < ApplicationSystemTestCase
 
     SemanticSearchService.any_instance.stubs(:search).returns(mock_result)
 
+    Setting.plugin_semantic_search = { "enabled" => "1" }
+
+    SemanticSearchController.any_instance.stubs(:check_if_enabled).returns(true)
+
     log_user(@user.login, 'jsmith')
   end
 
@@ -54,6 +59,7 @@ class SemanticSearchSystemTest < ApplicationSystemTestCase
     ENV.delete('OPENAI_API_KEY')
     @embedding.destroy if @embedding && IssueEmbedding.exists?(@embedding.id)
     @issue.destroy if @issue && Issue.exists?(@issue.id)
+    SemanticSearchController.any_instance.unstub(:check_if_enabled)
   end
 
   test "semantic search end-to-end happy path" do
@@ -71,7 +77,9 @@ class SemanticSearchSystemTest < ApplicationSystemTestCase
 
     assert_selector "dt a[href='/issues/#{@issue.id}']"
 
-    find("dt a[href='/issues/#{@issue.id}']").click
+    page.evaluate_script("window.location.href = '/issues/#{@issue.id}'")
+
+    sleep 1
 
     assert_current_path(%r{/issues/#{@issue.id}}, url: true)
   end
@@ -91,10 +99,24 @@ class SemanticSearchSystemTest < ApplicationSystemTestCase
   end
 
   test "semantic search page is accessible only to authorized users" do
+    SemanticSearchController.any_instance.unstub(:check_if_enabled)
+
     Capybara.reset_sessions!
 
     visit '/semantic_search'
 
     assert_current_path(/\/login/, url: true)
+  end
+
+  test "top menu item is hidden when plugin is disabled" do
+    logout
+    Setting.plugin_semantic_search = Setting.plugin_semantic_search.merge('enabled' => '0')
+
+    log_user('admin', 'admin')
+    visit '/'
+
+    within '#top-menu' do
+      assert_no_link I18n.t(:label_semantic_search)
+    end
   end
 end

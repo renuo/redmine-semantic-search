@@ -3,6 +3,12 @@
 
   <div class="box tabular settings">
     <p>
+      <label for="settings_enabled"><%= l(:label_enabled) %></label>
+      <%= check_box_tag 'settings[enabled]', '1', settings['enabled'] == '1' %>
+      <em class="info"><%= l(:text_enabled_info) %></em>
+    </p>
+
+    <p>
       <label><%= l(:label_openai_api_key) %></label>
       <em class="info"><%= l(:text_openai_api_key_info) %></em>
       <br>

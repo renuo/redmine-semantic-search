@@ -1,7 +1,8 @@
 class SemanticSearchController < ApplicationController
   before_action :require_login
   before_action :authorize_semantic_search
-  before_action :require_admin, only: [:settings, :update_settings, :sync_embeddings]
+  before_action :authorize_sync_embeddings, only: [:sync_embeddings]
+  before_action :check_if_enabled
 
   def index
     @projects = Project.visible.sorted.to_a
@@ -20,36 +21,47 @@ class SemanticSearchController < ApplicationController
     render layout: "base"
   end
 
-  def settings
-    @settings = Setting.plugin_semantic_search
-  end
-
-  def update_settings
-    Setting.plugin_semantic_search = params[:settings]
-    flash[:notice] = l(:notice_successful_update)
-
-    # check if model was changed, if yes, schedule a job to sync embeddings
-    if params[:settings][:model] != Setting.plugin_semantic_search[:model]
-      SyncEmbeddingsJob.perform_later
-    end
-
-    redirect_to action: "settings"
-  end
-
   def sync_embeddings
     issue_count = Issue.count
 
-    SyncEmbeddingsJob.perform_later
+    if Setting.plugin_semantic_search["enabled"] == "1"
+      SyncEmbeddingsJob.perform_later
+      flash[:notice] = l(:notice_sync_embeddings_started, count: issue_count)
+    else
+      flash[:error] = l(:error_plugin_disabled)
+    end
 
-    flash[:notice] = l(:notice_sync_embeddings_started, count: issue_count)
     redirect_back(fallback_location: { controller: "issues", action: "index" })
   end
 
   private
 
   def authorize_semantic_search
-    unless User.current.allowed_to?(:use_semantic_search, nil, global: true)
+    unless User.current.admin? || User.current.allowed_to?(:use_semantic_search, nil, global: true)
       deny_access
+    end
+  end
+
+  def authorize_sync_embeddings
+    user = User.current
+    plugin_enabled = Setting.plugin_semantic_search["enabled"] == "1"
+
+    unless plugin_enabled
+      flash[:error] = l(:error_plugin_disabled)
+      redirect_back(fallback_location: { controller: "issues", action: "index" })
+      return
+    end
+
+    can_access_sync = user.admin?
+
+    unless can_access_sync
+      deny_access
+    end
+  end
+
+  def check_if_enabled
+    unless User.current.admin? || Setting.plugin_semantic_search["enabled"] == "1"
+      render_404
     end
   end
 end

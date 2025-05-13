@@ -7,6 +7,7 @@ class IssueEmbedding < ActiveRecord::Base
   validates :issue, presence: true
   validates :embedding_vector, presence: true
   validates :content_hash, presence: true
+  validates :model_used, presence: true
 
   def self.calculate_content_hash(issue)
     content = [

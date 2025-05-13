@@ -7,6 +7,7 @@ en:
   label_semantic_search_placeholder: "Enter natural language search query..."
   label_settings: "Settings"
   label_result_count: "%{count} result(s) found"
+  label_enabled: "Enable Semantic Search"
   label_openai_api_key: "OpenAI API Key"
   label_base_url: "OpenAI API Base URL"
   label_embedding_model: "Embedding Model"
@@ -26,6 +27,7 @@ en:
   button_sync_embeddings: "Sync Embeddings"
 
   text_semantic_search_info: "Semantic search uses AI to find issues based on meaning, not just keywords."
+  text_enabled_info: "Enable or disable the semantic search functionality globally."
   text_openai_api_key_info: "Required API key for OpenAI to generate embeddings."
   text_base_url_info: "Base URL for the OpenAI API. Default is https://api.openai.com/v1"
   text_env_variable_required: "Must be set as an environment variable OPENAI_API_KEY in your Redmine installation."
@@ -36,3 +38,4 @@ en:
   permission_use_semantic_search: "Use semantic search"
 
   error_openai_api_key_required: "OpenAI API key not found. Please set OPENAI_API_KEY environment variable."
+  error_plugin_disabled: "Semantic Search is currently disabled. Please enable it in the plugin settings."

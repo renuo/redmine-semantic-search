@@ -14,7 +14,8 @@ class SemanticSearchTest < Redmine::IntegrationTest
     @embedding = IssueEmbedding.create!(
       issue: @issue,
       embedding_vector: [0.1] * 1536,
-      content_hash: 'test_hash'
+      content_hash: 'test_hash',
+      model_used: 'text-embedding-ada-002'
     )
 
     @mock_results = [
@@ -28,10 +29,15 @@ class SemanticSearchTest < Redmine::IntegrationTest
       }
     ]
     SemanticSearchService.any_instance.stubs(:search).returns(@mock_results)
+
+    Setting.plugin_semantic_search = { "enabled" => "1" }
+
+    SemanticSearchController.any_instance.stubs(:check_if_enabled).returns(true)
   end
 
   def teardown
     ENV.delete('OPENAI_API_KEY')
+    SemanticSearchController.any_instance.unstub(:check_if_enabled)
   end
 
   def test_semantic_search_happy_path
