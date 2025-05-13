@@ -20,7 +20,7 @@ class ApplicationSystemTestCase < ActionDispatch::SystemTestCase
     sanitized_login = login.gsub(/[^0-9A-Za-z_.-]/, '_')
     # Saving to tmp/screenshots to align with existing failure screenshot path structure
     screenshot_path = "tmp/screenshots/debug_login_#{sanitized_login}_#{Time.now.to_i}.png"
-    save_screenshot(screenshot_path, full: true)
+    save_screenshot(screenshot_path)
     puts "Screenshot saved to: #{File.expand_path(screenshot_path, Rails.root)}"
     puts "Current URL: #{current_url}"
     puts "Page title: #{page.title}"
