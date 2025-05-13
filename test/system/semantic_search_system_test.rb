@@ -52,6 +52,7 @@ class SemanticSearchSystemTest < ApplicationSystemTestCase
 
     SemanticSearchController.any_instance.stubs(:check_if_enabled).returns(true)
 
+    logout
     log_user(@user.login, 'jsmith')
   end
 
@@ -108,11 +109,13 @@ class SemanticSearchSystemTest < ApplicationSystemTestCase
     assert_current_path(/\/login/, url: true)
   end
 
-  test "top menu item is hidden when plugin is disabled" do
+  test "top_menu_item_is_hidden_when_plugin_is_disabled" do
     logout
-    Setting.plugin_semantic_search = Setting.plugin_semantic_search.merge('enabled' => '0')
 
     log_user('admin', 'admin')
+
+    Setting.plugin_semantic_search = Setting.plugin_semantic_search.merge('enabled' => '0')
+
     visit '/'
 
     within '#top-menu' do
