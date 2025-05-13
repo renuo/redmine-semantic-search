@@ -20,6 +20,7 @@ Redmine::Plugin.register :semantic_search do
   author_url "https://github.com/renuo"
 
   settings default: {
+    "enabled" => "0",
     "base_url" => "https://api.openai.com/v1",
     "embedding_model" => "text-embedding-ada-002",
     "search_limit" => 25,
@@ -31,17 +32,21 @@ Redmine::Plugin.register :semantic_search do
   menu :top_menu, :semantic_search,
        { controller: "semantic_search", action: "index" },
        caption: :label_semantic_search,
-       if: Proc.new { User.current.logged? && User.current.allowed_to?(:use_semantic_search, nil, global: true) }
-
-  menu :admin_menu, :semantic_search,
-       { controller: "semantic_search", action: "settings" },
-       caption: :label_semantic_search_settings
+       if: Proc.new {
+         user = User.current
+         Setting.plugin_semantic_search['enabled'] == '1' &&
+           user.logged? &&
+           user.allowed_to?(:use_semantic_search, nil, global: true)
+       }
 
   menu :application_menu, :sync_embeddings,
        { controller: "semantic_search", action: "sync_embeddings" },
        caption: :button_sync_embeddings,
        html: { method: :post },
-       if: Proc.new { User.current.admin? }
+       if: Proc.new {
+         user = User.current
+         user.admin?
+       }
 
   project_module :semantic_search do
     permission :use_semantic_search, { semantic_search: [:index] }

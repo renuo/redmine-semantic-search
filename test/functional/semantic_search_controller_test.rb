@@ -8,6 +8,9 @@ class SemanticSearchControllerTest < Redmine::ControllerTest
   def setup
     @request.session[:user_id] = 1
     Role.find(1).add_permission! :use_semantic_search
+
+    # Enable the plugin by default for most tests
+    Setting.plugin_semantic_search = { "enabled" => "1" }
   end
 
   def test_index
@@ -48,28 +51,7 @@ class SemanticSearchControllerTest < Redmine::ControllerTest
     assert_select 'dl#search-results-list dt', 1, "No search result items found"
   end
 
-  def test_settings
-    get :settings
-    assert_response :success
-    assert_select 'h2', 'Semantic Search Settings'
-    assert_select 'form'
-  end
-
-  def test_update_settings
-    post :update_settings, params: {
-      settings: {
-        'embedding_model' => 'text-embedding-ada-002',
-        'search_limit' => '30',
-        'include_description' => '1',
-        'include_comments' => '1',
-        'include_time_entries' => '1'
-      }
-    }
-    assert_redirected_to action: 'settings'
-    assert_equal '30', Setting.plugin_semantic_search['search_limit']
-  end
-
-  def test_sync_embeddings
+  def test_sync_embeddings_when_enabled
     assert_enqueued_with(job: SyncEmbeddingsJob) do
       post :sync_embeddings
     end
@@ -78,20 +60,41 @@ class SemanticSearchControllerTest < Redmine::ControllerTest
     assert_equal l(:notice_sync_embeddings_started, count: Issue.count), flash[:notice]
   end
 
+  def test_sync_embeddings_when_disabled
+    Setting.plugin_semantic_search = { "enabled" => "0" }
+
+    assert_no_enqueued_jobs do
+      post :sync_embeddings
+    end
+
+    assert_redirected_to controller: 'issues', action: 'index'
+    assert_equal l(:error_plugin_disabled), flash[:error]
+  end
+
   def test_non_admin_cannot_sync_embeddings
     @request.session[:user_id] = 2
     post :sync_embeddings
     assert_response :forbidden
   end
 
-  def test_non_admin_cannot_access_settings
+  def test_manager_can_access_search_when_enabled
     @request.session[:user_id] = 2
-    get :settings
-    assert_response :forbidden
+    get :index
+    assert_response :success
   end
 
-  def test_manager_can_access_search
+  def test_manager_cannot_access_search_when_disabled
+    Setting.plugin_semantic_search = { "enabled" => "0" }
+
     @request.session[:user_id] = 2
+    get :index
+    assert_response :not_found
+  end
+
+  def test_admin_can_access_search_when_disabled
+    Setting.plugin_semantic_search = { "enabled" => "0" }
+
+    @request.session[:user_id] = 1
     get :index
     assert_response :success
   end

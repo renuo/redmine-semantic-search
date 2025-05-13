@@ -18,7 +18,9 @@ class ApplicationSystemTestCase < ActionDispatch::SystemTestCase
   end
 
   def logout
-    visit '/logout'
+    if has_link?(class: 'logout')
+      click_link(class: 'logout')
+    end
     assert_no_selector '#loggedas'
   end
 end

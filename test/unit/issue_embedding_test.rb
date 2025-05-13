@@ -8,7 +8,8 @@ class IssueEmbeddingTest < ActiveSupport::TestCase
     @embedding = IssueEmbedding.new(
       issue: @issue,
       embedding_vector: [0.1] * 1536,
-      content_hash: 'test_hash'
+      content_hash: 'test_hash',
+      model_used: 'text-embedding-ada-002'
     )
   end
 
@@ -93,7 +94,8 @@ class IssueEmbeddingTest < ActiveSupport::TestCase
     embedding = IssueEmbedding.create!(
       issue: issue,
       embedding_vector: [0.1] * 1536,
-      content_hash: current_hash
+      content_hash: current_hash,
+      model_used: 'text-embedding-ada-002'
     )
 
     assert_not embedding.needs_update?(issue)

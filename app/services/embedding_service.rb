@@ -9,8 +9,8 @@ class EmbeddingService
     @client = OpenAI::Client.new(access_token: api_key, uri_base: base_url)
   end
 
-  # Generate embeddings for a given text
   def generate_embedding(text)
+    Rails.logger.info("Generating embedding for text: #{text}")
     response = @client.embeddings(
       parameters: {
         model: embedding_model,

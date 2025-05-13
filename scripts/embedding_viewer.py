@@ -36,6 +36,7 @@ def fetch_embeddings(conn, limit=1000, project_id=None, issue_id=None):
     SELECT
         ie.id,
         ie.issue_id,
+        ie.model_used,
         i.subject,
         p.name as project_name,
         t.name as tracker_name,
