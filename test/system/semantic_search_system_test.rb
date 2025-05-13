@@ -52,7 +52,7 @@ class SemanticSearchSystemTest < ApplicationSystemTestCase
       "similarity_score" => 0.95
     }]
 
-    SemanticSearchService.any_instance.stubs(:search).returns(mock_result)
+    SemanticSearchService.any_instance.stubs(:search).with(any_parameters).returns(mock_result)
 
     Setting.plugin_semantic_search = { "enabled" => "1" }
 
@@ -89,15 +89,17 @@ class SemanticSearchSystemTest < ApplicationSystemTestCase
       click_button 'Search'
     end
 
-    assert_selector 'dl#search-results-list', wait: 5
+    using_wait_time 10 do
+      assert_selector '#search-results'
+      assert_selector 'dl#search-results-list'
+      assert_selector "dt a[href='/issues/#{@issue.id}']"
+    end
 
-    assert_selector "dt a[href='/issues/#{@issue.id}']"
+    find("dt a[href='/issues/#{@issue.id}']").click
 
-    page.evaluate_script("window.location.href = '/issues/#{@issue.id}'")
-
-    sleep 1
-
-    assert_current_path(%r{/issues/#{@issue.id}}, url: true)
+    using_wait_time 10 do
+      assert_current_path(%r{/issues/#{@issue.id}}, url: true)
+    end
   end
 
   test "semantic search with empty results" do
@@ -128,7 +130,9 @@ class SemanticSearchSystemTest < ApplicationSystemTestCase
 
     visit '/semantic_search'
 
-    assert_current_path(/\/login/, url: true)
+    using_wait_time 5 do
+      assert_current_path(/\/login/, url: true)
+    end
   end
 
   test "top_menu_item_is_hidden_when_plugin_is_disabled" do
@@ -136,9 +140,13 @@ class SemanticSearchSystemTest < ApplicationSystemTestCase
 
     log_user('admin', 'admin')
 
+    assert_selector '#loggedas', wait: 5
+
     Setting.plugin_semantic_search = Setting.plugin_semantic_search.merge('enabled' => '0')
 
     visit '/'
+
+    assert_selector '#top-menu', wait: 5
 
     within '#top-menu' do
       assert_no_link I18n.t(:label_semantic_search)
