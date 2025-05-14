@@ -23,12 +23,12 @@ class SemanticSearchSystemTest < ApplicationSystemTestCase
 
     @embedding = IssueEmbedding.create!(
       issue: @issue,
-      embedding_vector: [0.1] * 1536,
+      embedding_vector: [0.1] * 2000,
       content_hash: 'test_hash',
       model_used: 'text-embedding-ada-002'
     )
 
-    EmbeddingService.any_instance.stubs(:generate_embedding).returns([0.1] * 1536)
+    EmbeddingService.any_instance.stubs(:generate_embedding).returns([0.1] * 2000)
 
     mock_result = [{
       "issue_id" => @issue.id,

@@ -13,7 +13,7 @@ class SemanticSearchTest < Redmine::IntegrationTest
     @issue = Issue.find(1)
     @embedding = IssueEmbedding.create!(
       issue: @issue,
-      embedding_vector: [0.1] * 1536,
+      embedding_vector: [0.1] * 2000,
       content_hash: 'test_hash',
       model_used: 'text-embedding-ada-002'
     )
