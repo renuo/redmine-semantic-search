@@ -74,7 +74,7 @@ class SemanticSearchSystemTest < ApplicationSystemTestCase
       click_button 'Search'
     end
 
-    assert_selector 'dl#search-results-list', wait: 5
+    assert_selector 'dl#search-results-list', wait: 3
 
     assert_selector "dt a[href='/issues/#{@issue.id}']"
 
@@ -96,7 +96,7 @@ class SemanticSearchSystemTest < ApplicationSystemTestCase
       click_button 'Search'
     end
 
-    assert_selector 'p.nodata', wait: 5
+    assert_selector 'p.nodata', wait: 3
   end
 
   test "semantic search page is accessible only to authorized users" do
@@ -119,7 +119,7 @@ class SemanticSearchSystemTest < ApplicationSystemTestCase
     visit '/'
 
     within '#top-menu' do
-      assert_no_link I18n.t(:label_semantic_search), wait: 5
+      assert_no_link I18n.t(:label_semantic_search), wait: 3
     end
   end
 end
