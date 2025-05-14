@@ -7,7 +7,7 @@ class IssueEmbeddingTest < ActiveSupport::TestCase
     @issue = Issue.find(1)
     @embedding = IssueEmbedding.new(
       issue: @issue,
-      embedding_vector: [0.1] * 1536,
+      embedding_vector: [0.1] * 2000,
       content_hash: 'test_hash',
       model_used: 'text-embedding-ada-002'
     )
@@ -29,7 +29,7 @@ class IssueEmbeddingTest < ActiveSupport::TestCase
     assert_not @embedding.valid?
     assert_includes @embedding.errors[:embedding_vector], 'cannot be blank'
 
-    @embedding.embedding_vector = [0.1] * 1536
+    @embedding.embedding_vector = [0.1] * 2000
     @embedding.content_hash = nil
     assert_not @embedding.valid?
     assert_includes @embedding.errors[:content_hash], 'cannot be blank'
@@ -93,7 +93,7 @@ class IssueEmbeddingTest < ActiveSupport::TestCase
     current_hash = IssueEmbedding.calculate_content_hash(issue)
     embedding = IssueEmbedding.create!(
       issue: issue,
-      embedding_vector: [0.1] * 1536,
+      embedding_vector: [0.1] * 2000,
       content_hash: current_hash,
       model_used: 'text-embedding-ada-002'
     )

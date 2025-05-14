@@ -6,21 +6,21 @@ class ApplicationSystemTestCase < ActionDispatch::SystemTestCase
   end
 
   setup do
-    EmbeddingService.any_instance.stubs(:generate_embedding).returns(Array.new(1536) { 0.1 })
+    EmbeddingService.any_instance.stubs(:generate_embedding).returns(Array.new(2000) { 0.1 })
   end
 
   def log_user(login, password)
     visit '/login'
     fill_in 'username', with: login
     fill_in 'password', with: password
-    click_button 'Login', wait: 5
-    assert_selector '#loggedas'
+    click_button 'Login', wait: 3
+    assert_selector '#loggedas', wait: 3
   end
 
   def logout
     if has_link?(class: 'logout')
-      click_link(class: 'logout')
+      click_link(class: 'logout', wait: 3)
     end
-    assert_no_selector '#loggedas'
+    assert_no_selector '#loggedas', wait: 3
   end
 end

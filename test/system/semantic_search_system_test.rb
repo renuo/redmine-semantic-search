@@ -23,12 +23,12 @@ class SemanticSearchSystemTest < ApplicationSystemTestCase
 
     @embedding = IssueEmbedding.create!(
       issue: @issue,
-      embedding_vector: [0.1] * 1536,
+      embedding_vector: [0.1] * 2000,
       content_hash: 'test_hash',
       model_used: 'text-embedding-ada-002'
     )
 
-    EmbeddingService.any_instance.stubs(:generate_embedding).returns([0.1] * 1536)
+    EmbeddingService.any_instance.stubs(:generate_embedding).returns([0.1] * 2000)
 
     mock_result = [{
       "issue_id" => @issue.id,
@@ -74,7 +74,7 @@ class SemanticSearchSystemTest < ApplicationSystemTestCase
       click_button 'Search'
     end
 
-    assert_selector 'dl#search-results-list', wait: 5
+    assert_selector 'dl#search-results-list', wait: 3
 
     assert_selector "dt a[href='/issues/#{@issue.id}']"
 
@@ -96,7 +96,7 @@ class SemanticSearchSystemTest < ApplicationSystemTestCase
       click_button 'Search'
     end
 
-    assert_selector 'p.nodata', wait: 5
+    assert_selector 'p.nodata', wait: 3
   end
 
   test "semantic search page is accessible only to authorized users" do
@@ -119,7 +119,7 @@ class SemanticSearchSystemTest < ApplicationSystemTestCase
     visit '/'
 
     within '#top-menu' do
-      assert_no_link I18n.t(:label_semantic_search)
+      assert_no_link I18n.t(:label_semantic_search), wait: 3
     end
   end
 end

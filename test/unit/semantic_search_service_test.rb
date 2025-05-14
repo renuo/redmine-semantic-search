@@ -10,7 +10,7 @@ class SemanticSearchServiceTest < ActiveSupport::TestCase
     @service = SemanticSearchService.new
     @user = User.find(1)
     @query = "test search query"
-    @query_embedding = Array.new(1536) { rand }
+    @query_embedding = Array.new(2000) { rand }
   end
 
   def test_search
@@ -19,7 +19,7 @@ class SemanticSearchServiceTest < ActiveSupport::TestCase
     issue = Issue.find(1)
     embedding = IssueEmbedding.new(
       issue: issue,
-      embedding_vector: Array.new(1536) { rand },
+      embedding_vector: Array.new(2000) { rand },
       content_hash: 'test_hash',
       model_used: 'text-embedding-ada-002'
     )
@@ -79,7 +79,7 @@ class SemanticSearchServiceTest < ActiveSupport::TestCase
 
     visible_embedding = IssueEmbedding.new(
       issue: visible_issue,
-      embedding_vector: Array.new(1536) { rand },
+      embedding_vector: Array.new(2000) { rand },
       content_hash: 'visible_hash',
       model_used: 'text-embedding-ada-002'
     )
@@ -87,7 +87,7 @@ class SemanticSearchServiceTest < ActiveSupport::TestCase
 
     invisible_embedding = IssueEmbedding.new(
       issue: invisible_issue,
-      embedding_vector: Array.new(1536) { rand },
+      embedding_vector: Array.new(2000) { rand },
       content_hash: 'invisible_hash',
       model_used: 'text-embedding-ada-002'
     )

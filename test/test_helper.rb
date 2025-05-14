@@ -10,7 +10,7 @@ class EmbeddingServiceMock
   end
 
   def generate_embedding(text)
-    Array.new(1536) { 0.1 }
+    Array.new(2000) { 0.1 }
   end
 
   def prepare_issue_content(issue)

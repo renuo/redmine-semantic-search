@@ -39,3 +39,5 @@ en:
 
   error_openai_api_key_required: "OpenAI API key not found. Please set OPENAI_API_KEY environment variable."
   error_plugin_disabled: "Semantic Search is currently disabled. Please enable it in the plugin settings."
+
+  text_embedding_model_info: "Make sure the model you choose has an output vector dimension of 2000 or less, and supports the OpenAI API Specification."
