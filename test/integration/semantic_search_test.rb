@@ -1,6 +1,7 @@
 require File.expand_path('../../test_helper', __FILE__)
 
 class SemanticSearchTest < Redmine::IntegrationTest
+  include LoginHelpers::Integration
   fixtures :projects, :users, :roles, :members, :member_roles, :issues, :trackers
 
   def setup
@@ -66,19 +67,5 @@ class SemanticSearchTest < Redmine::IntegrationTest
 
     get '/semantic_search'
     assert_response :forbidden
-  end
-
-  private
-
-  def log_user(login, password)
-    get '/login'
-    assert_response :success
-    post '/login', params: {
-      username: login,
-      password: password
-    }
-    assert_redirected_to '/my/page'
-    follow_redirect!
-    assert_equal login, User.find(session[:user_id]).login
   end
 end

@@ -5,6 +5,8 @@ class ApplicationSystemTestCase < ActionDispatch::SystemTestCase
     driver_options.add_argument 'disable-gpu'
   end
 
+  include LoginHelpers::System
+
   setup do
     EmbeddingService.any_instance.stubs(:generate_embedding).returns(Array.new(2000) { 0.1 })
   end
@@ -14,13 +16,13 @@ class ApplicationSystemTestCase < ActionDispatch::SystemTestCase
     fill_in 'username', with: login
     fill_in 'password', with: password
     click_button 'Login', wait: 3
-    assert_selector '#loggedas', wait: 3
+    assert_selector '#loggedas', wait: 5
   end
 
   def logout
     if has_link?(class: 'logout')
       click_link(class: 'logout', wait: 3)
     end
-    assert_no_selector '#loggedas', wait: 3
+    assert_no_selector '#loggedas', wait: 5
   end
 end

@@ -1,4 +1,4 @@
-class ChangeMaxVectorSize < ActiveRecord::Migration[7.2]
+class ChangeMaxVectorSize < ActiveRecord::Migration[6.1]
   def up
     execute "DROP INDEX IF EXISTS issue_embeddings_vector_idx"
     execute "ALTER TABLE issue_embeddings ALTER COLUMN embedding_vector TYPE vector(2000)"

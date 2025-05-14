@@ -26,3 +26,37 @@ end
 ActiveSupport::TestCase.setup do |test|
   # TODO: implement?
 end
+
+# Login helper methods for different test types
+module LoginHelpers
+  module Integration
+    def log_user(login, password)
+      get '/login'
+      assert_response :success
+      post '/login', params: {
+        username: login,
+        password: password
+      }
+      assert_redirected_to '/my/page'
+      follow_redirect!
+      assert_equal login, User.find(session[:user_id]).login
+    end
+  end
+
+  module System
+    def log_user(login, password)
+      visit '/login'
+      fill_in 'username', with: login
+      fill_in 'password', with: password
+      click_button 'Login', wait: 3
+      assert_selector '#loggedas', wait: 3
+    end
+
+    def logout
+      if has_link?(class: 'logout')
+        click_link(class: 'logout', wait: 3)
+      end
+      assert_no_selector '#loggedas', wait: 3
+    end
+  end
+end
