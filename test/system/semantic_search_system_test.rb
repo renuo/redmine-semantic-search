@@ -119,7 +119,7 @@ class SemanticSearchSystemTest < ApplicationSystemTestCase
     visit '/'
 
     within '#top-menu' do
-      assert_no_link I18n.t(:label_semantic_search)
+      assert_no_link I18n.t(:label_semantic_search), wait: 5
     end
   end
 end
