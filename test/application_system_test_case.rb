@@ -5,6 +5,8 @@ class ApplicationSystemTestCase < ActionDispatch::SystemTestCase
     driver_options.add_argument 'disable-gpu'
   end
 
+  include LoginHelpers::System
+
   setup do
     EmbeddingService.any_instance.stubs(:generate_embedding).returns(Array.new(2000) { 0.1 })
   end

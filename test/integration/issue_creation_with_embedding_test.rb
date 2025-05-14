@@ -2,6 +2,7 @@ require File.expand_path('../../test_helper', __FILE__)
 
 class IssueCreationWithEmbeddingTest < Redmine::IntegrationTest
   include ActiveJob::TestHelper
+  include LoginHelpers::Integration
   fixtures :projects, :users, :roles, :members, :member_roles, :trackers, :issue_statuses
 
   def setup
@@ -94,19 +95,5 @@ class IssueCreationWithEmbeddingTest < Redmine::IntegrationTest
     SemanticSearch::IssueHooks.instance.singleton_class.class_eval do
       define_method(:plugin_enabled?, original_method)
     end
-  end
-
-  private
-
-  def log_user(login, password)
-    get '/login'
-    assert_response :success
-    post '/login', params: {
-      username: login,
-      password: password
-    }
-    assert_redirected_to '/my/page'
-    follow_redirect!
-    assert_equal login, User.find(session[:user_id]).login
   end
 end
