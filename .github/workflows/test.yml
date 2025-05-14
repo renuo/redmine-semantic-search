@@ -7,13 +7,16 @@ on:
 jobs:
   test:
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        redmine_version: ["6.0", "5.1"]
     env:
       RAILS_ENV: test
       OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
       PGHOST: localhost
       PGUSER: postgres
       PGPASSWORD: postgres
-      REDMINE_VERSION: 6.0.5
+      REDMINE_VERSION: ${{ matrix.redmine_version }}
 
     services:
       postgres:
@@ -35,7 +38,7 @@ jobs:
         uses: actions/cache@v3
         with:
           path: redmine
-          key: redmine-${{ env.REDMINE_VERSION }}
+          key: redmine-${{ matrix.redmine_version }}
 
       - name: Checkout redmine repository
         if: steps.cache-redmine.outputs.cache-hit != 'true'
@@ -43,7 +46,7 @@ jobs:
         with:
           repository: redmine/redmine
           path: redmine
-          ref: ${{ env.REDMINE_VERSION }}
+          ref: ${{ matrix.redmine_version }}
 
       - name: Checkout plugin
         uses: actions/checkout@v4
