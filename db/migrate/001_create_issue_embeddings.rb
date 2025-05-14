@@ -1,4 +1,4 @@
-class CreateIssueEmbeddings < ActiveRecord::Migration[7.2]
+class CreateIssueEmbeddings < ActiveRecord::Migration[6.1]
   def up
     execute "CREATE EXTENSION IF NOT EXISTS vector"
 
