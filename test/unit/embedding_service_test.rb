@@ -48,8 +48,9 @@ class EmbeddingServiceTest < ActiveSupport::TestCase
       }
     ).returns(mock_response)
 
-    result = @service.generate_embedding("Test text")
-    assert_equal mock_embedding, result
+    result, original_dimension = @service.generate_embedding("Test text")
+    assert_equal 2000, result.length
+    assert_equal 1536, original_dimension
   end
 
   def test_generate_embedding_handles_error_response
@@ -75,6 +76,16 @@ class EmbeddingServiceTest < ActiveSupport::TestCase
     assert_raises(EmbeddingService::EmbeddingError) do
       @service.generate_embedding("Test text")
     end
+  end
+
+  def test_pad_embedding
+    vector = Array.new(1000) { 0.1 }
+    result = @service.pad_embedding(vector)
+    assert_equal EmbeddingService::MAX_DIMENSION, result.length
+
+    vector = Array.new(EmbeddingService::MAX_DIMENSION) { 0.1 }
+    result = @service.pad_embedding(vector)
+    assert_equal EmbeddingService::MAX_DIMENSION, result.length
   end
 
   def test_prepare_issue_content

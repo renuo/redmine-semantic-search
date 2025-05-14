@@ -14,13 +14,13 @@ class ApplicationSystemTestCase < ActionDispatch::SystemTestCase
     fill_in 'username', with: login
     fill_in 'password', with: password
     click_button 'Login', wait: 5
-    assert_selector '#loggedas'
+    assert_selector '#loggedas', wait: 5
   end
 
   def logout
     if has_link?(class: 'logout')
-      click_link(class: 'logout')
+      click_link(class: 'logout', wait: 5)
     end
-    assert_no_selector '#loggedas'
+    assert_no_selector '#loggedas', wait: 5
   end
 end

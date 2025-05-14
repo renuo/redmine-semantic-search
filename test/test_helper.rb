@@ -10,7 +10,13 @@ class EmbeddingServiceMock
   end
 
   def generate_embedding(text)
-    Array.new(1536) { 0.1 }
+    vector = Array.new(1536) { 0.1 }
+    reduced_vector = DimensionReductionService.reduce_dimensions(
+      DimensionReductionService.pad_vector(vector, 5500),
+      5500,
+      2000
+    )
+    return reduced_vector, 1536
   end
 
   def prepare_issue_content(issue)

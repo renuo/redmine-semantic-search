@@ -24,6 +24,7 @@ class IssueEmbeddingJobTest < ActiveSupport::TestCase
     embedding = IssueEmbedding.find_by(issue_id: @issue.id)
     assert_not_nil embedding
     assert_equal @issue.id, embedding.issue_id
+    assert_equal 1536, embedding.original_dimension
   end
 
   def test_job_does_nothing_when_disabled
@@ -48,9 +49,10 @@ class IssueEmbeddingJobTest < ActiveSupport::TestCase
     content_hash = IssueEmbedding.calculate_content_hash(@issue)
     original_embedding = IssueEmbedding.create!(
       issue_id: @issue.id,
-      embedding_vector: [0.1] * 1536,
+      embedding_vector: Array.new(2000) { 0.1 },
       content_hash: content_hash,
-      model_used: 'text-embedding-ada-002'
+      model_used: 'text-embedding-ada-002',
+      original_dimension: 1536
     )
 
     job = IssueEmbeddingJob.new
