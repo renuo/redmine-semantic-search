@@ -3,7 +3,8 @@ require "ruby/openai"
 class EmbeddingService
   class EmbeddingError < StandardError; end
 
-  MAX_DIMENSION = 1536
+  MAX_DIMENSION = 5500
+  TARGET_DIMENSION = 2000
 
   def initialize
     @client = OpenAI::Client.new(access_token: api_key, uri_base: base_url)
@@ -23,7 +24,27 @@ class EmbeddingService
       raise EmbeddingError, "Failed to generate embedding: #{response['error']['message']}"
     end
 
-    pad_embedding(response.dig("data", 0, "embedding"))
+    embedding = response.dig("data", 0, "embedding")
+    original_dimension = embedding.length
+
+    Rails.logger.info("Generated embedding with original dimension: #{original_dimension}")
+
+    padded_embedding = pad_embedding(embedding)
+
+    reduced_embedding = DimensionReductionService.reduce_dimensions(
+      padded_embedding,
+      MAX_DIMENSION,
+      TARGET_DIMENSION
+    )
+
+    Rails.logger.info("Reduced embedding to dimension: #{TARGET_DIMENSION}")
+
+    final_embedding = DimensionReductionService.validate_vector_dimension(
+      reduced_embedding,
+      TARGET_DIMENSION
+    )
+
+    return final_embedding, original_dimension
   rescue Faraday::Error => e
     Rails.logger.error("OpenAI API connection error: #{e.message}")
     raise EmbeddingError, "Connection error while generating embedding: #{e.message}"

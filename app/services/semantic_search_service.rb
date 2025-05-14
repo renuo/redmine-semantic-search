@@ -3,21 +3,61 @@ class SemanticSearchService
     @embedding_service = EmbeddingService.new
   end
 
-  def search(query, user, limit = 10)
-    query_embedding = @embedding_service.generate_embedding(query)
+  def search(query, user, limit = 10, debug = false)
+    Rails.logger.info("Performing semantic search for query: #{query}")
+
+    query_embedding, original_dimension = @embedding_service.generate_embedding(query)
+
+    Rails.logger.info("Query embedding generated with dimension: #{query_embedding.length}, original: #{original_dimension}")
+
+    query_embedding = DimensionReductionService.validate_vector_dimension(
+      query_embedding,
+      EmbeddingService::TARGET_DIMENSION
+    )
+
+    Rails.logger.info("Validated query embedding dimension: #{query_embedding.length}")
+
     results = fetch_raw_results(query_embedding, limit)
     processed_results = process_results(results)
-    filter_by_visibility(processed_results, user)
+
+    Rails.logger.info("Found #{processed_results.length} results before visibility filtering")
+
+    filtered_results = filter_by_visibility(processed_results, user)
+
+    Rails.logger.info("Returning #{filtered_results.length} visible results")
+
+    filtered_results
   end
 
   private
 
   def fetch_raw_results(query_embedding, limit)
     sql = build_search_sql(query_embedding, limit)
-    ActiveRecord::Base.connection.execute(sql)
+
+    sql.gsub(/ARRAY\[.*?\]::vector/, "ARRAY[...vector values...]::vector")
+
+    begin
+      results = ActiveRecord::Base.connection.execute(sql)
+      results
+    rescue
+      begin
+        db_dimension = ActiveRecord::Base.connection.execute(
+          "SELECT pg_catalog.format_type(atttypid, atttypmod-4) FROM pg_catalog.pg_attribute WHERE attrelid = 'issue_embeddings'::regclass AND attname = 'embedding_vector'"
+        ).first["format_type"]
+
+        Rails.logger.error("Database column type: #{db_dimension}")
+        Rails.logger.error("Provided vector length: #{query_embedding.length}")
+      rescue => debug_error
+        Rails.logger.error("Error getting debug info: #{debug_error.message}")
+      end
+
+      raise
+    end
   end
 
   def build_search_sql(query_embedding, limit)
+    vector_string = query_embedding.join(',')
+
     <<-SQL
       SELECT issue_embeddings.issue_id,
              issues.subject,
@@ -35,7 +75,7 @@ class SemanticSearchService
              assigned_users.firstname AS assigned_to_firstname,
              assigned_users.lastname AS assigned_to_lastname,
              assigned_users.login AS assigned_to_login,
-             issue_embeddings.embedding_vector <-> ARRAY[#{query_embedding.join(',')}]::vector AS distance
+             issue_embeddings.embedding_vector <-> ARRAY[#{vector_string}]::vector(#{EmbeddingService::TARGET_DIMENSION}) AS distance
       FROM issue_embeddings
       INNER JOIN issues ON issues.id = issue_embeddings.issue_id
       INNER JOIN projects ON projects.id = issues.project_id

@@ -10,18 +10,20 @@ class SemanticSearchServiceTest < ActiveSupport::TestCase
     @service = SemanticSearchService.new
     @user = User.find(1)
     @query = "test search query"
-    @query_embedding = Array.new(1536) { rand }
+    @query_embedding = Array.new(2000) { rand }
+    @original_dimension = 1536
   end
 
   def test_search
-    @mock_embedding_service.expects(:generate_embedding).with(@query).returns(@query_embedding)
+    @mock_embedding_service.expects(:generate_embedding).with(@query).returns([@query_embedding, @original_dimension])
 
     issue = Issue.find(1)
     embedding = IssueEmbedding.new(
       issue: issue,
-      embedding_vector: Array.new(1536) { rand },
+      embedding_vector: Array.new(2000) { rand },
       content_hash: 'test_hash',
-      model_used: 'text-embedding-ada-002'
+      model_used: 'text-embedding-ada-002',
+      original_dimension: 1536
     )
     embedding.save!
 
@@ -72,24 +74,26 @@ class SemanticSearchServiceTest < ActiveSupport::TestCase
   end
 
   def test_filter_by_visibility
-    @mock_embedding_service.expects(:generate_embedding).with(@query).returns(@query_embedding)
+    @mock_embedding_service.expects(:generate_embedding).with(@query).returns([@query_embedding, @original_dimension])
 
     visible_issue = Issue.find(1)
     invisible_issue = Issue.find(2)
 
     visible_embedding = IssueEmbedding.new(
       issue: visible_issue,
-      embedding_vector: Array.new(1536) { rand },
+      embedding_vector: Array.new(2000) { rand },
       content_hash: 'visible_hash',
-      model_used: 'text-embedding-ada-002'
+      model_used: 'text-embedding-ada-002',
+      original_dimension: 1536
     )
     visible_embedding.save!
 
     invisible_embedding = IssueEmbedding.new(
       issue: invisible_issue,
-      embedding_vector: Array.new(1536) { rand },
+      embedding_vector: Array.new(2000) { rand },
       content_hash: 'invisible_hash',
-      model_used: 'text-embedding-ada-002'
+      model_used: 'text-embedding-ada-002',
+      original_dimension: 1536
     )
     invisible_embedding.save!
 
@@ -149,7 +153,7 @@ class SemanticSearchServiceTest < ActiveSupport::TestCase
   end
 
   def test_search_with_empty_results
-    @mock_embedding_service.expects(:generate_embedding).with(@query).returns(@query_embedding)
+    @mock_embedding_service.expects(:generate_embedding).with(@query).returns([@query_embedding, @original_dimension])
 
     ActiveRecord::Base.connection.stubs(:execute).returns([])
 
@@ -160,7 +164,7 @@ class SemanticSearchServiceTest < ActiveSupport::TestCase
   end
 
   def test_search_with_limit
-    @mock_embedding_service.expects(:generate_embedding).with(@query).returns(@query_embedding)
+    @mock_embedding_service.expects(:generate_embedding).with(@query).returns([@query_embedding, @original_dimension])
 
     custom_limit = 5
     @service.expects(:build_search_sql).with(@query_embedding, custom_limit).returns("SELECT 1")
@@ -180,7 +184,7 @@ class SemanticSearchServiceTest < ActiveSupport::TestCase
   end
 
   def test_search_handles_database_error
-    @mock_embedding_service.expects(:generate_embedding).with(@query).returns(@query_embedding)
+    @mock_embedding_service.expects(:generate_embedding).with(@query).returns([@query_embedding, @original_dimension])
 
     @service.expects(:build_search_sql).with(@query_embedding, 10).returns("SELECT 1")
     ActiveRecord::Base.connection.stubs(:execute)

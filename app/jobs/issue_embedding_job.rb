@@ -31,16 +31,27 @@ class IssueEmbeddingJob < ActiveJob::Base
     embedding_service = EmbeddingService.new
     begin
       content = embedding_service.prepare_issue_content(issue)
-      vector = embedding_service.generate_embedding(content)
+      vector, original_dimension = embedding_service.generate_embedding(content)
+
+      Rails.logger.info("=> [SEMANTIC_SEARCH] Generated embedding with dimension: #{vector.length}, original: #{original_dimension}")
+
+      vector = DimensionReductionService.validate_vector_dimension(
+        vector,
+        EmbeddingService::TARGET_DIMENSION
+      )
+
+      Rails.logger.info("=> [SEMANTIC_SEARCH] Validated embedding dimension: #{vector.length}")
 
       embedding.embedding_vector = vector
       embedding.content_hash = content_hash
       embedding.model_used = Setting.plugin_semantic_search["embedding_model"]
+      embedding.original_dimension = original_dimension
       embedding.save!
 
       Rails.logger.info("=> [SEMANTIC_SEARCH] Successfully generated embedding for Issue ##{issue.id}")
     rescue StandardError => e
       Rails.logger.error("=> [SEMANTIC_SEARCH] Failed to generate embedding for Issue ##{issue.id}: #{e.message}")
+      Rails.logger.error("=> [SEMANTIC_SEARCH] Error details: #{e.backtrace.join("\n")}")
       raise e
     end
   end
