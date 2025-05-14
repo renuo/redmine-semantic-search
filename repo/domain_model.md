@@ -2,7 +2,8 @@
 
 This Markdown file contains the Mermaid Diagram for the Semantic Search Domain Model. The diagram shows the relationships between Issues, Issue Embeddings, Projects, Users, Trackers and Issue Statuses.
 
-> **📒 Note**: While Redmine has many other attributes available, only the necessary attributes are shown.
+> [!NOTE]
+> While Redmine has many other attributes available, only the necessary attributes are shown.
 
 ```mermaid
 classDiagram

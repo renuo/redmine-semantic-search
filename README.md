@@ -135,7 +135,8 @@ Once you have setup the Redmine Instance with
 
 ## Testing
 
-> **Note 📒**: Make sure you are in Redmine's root directory before running the tests
+> [!IMPORTANT]
+> Make sure you are in Redmine's root directory before running the tests
 
 The tests are written with MiniTest, the default testing framework for Ruby on Rails.
 
