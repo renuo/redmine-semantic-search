@@ -23,35 +23,48 @@ class DimensionReductionService
     end
   end
 
-  private
-
   def self.pca_like_reduction(vector, target_dimension)
     return vector.first(target_dimension) if vector.length <= target_dimension
 
+    top_indices = _select_top_indices(vector, target_dimension)
+    uniform_indices = _select_uniform_indices(vector, target_dimension, top_indices)
+    combined_indices = top_indices + uniform_indices
+    filled_indices = _fill_remaining_indices(vector, target_dimension, combined_indices)
+
+    selected_indices = (top_indices + uniform_indices + filled_indices).sort.uniq
+
+    selected_indices.first(target_dimension).map { |index| vector[index] }
+  end
+
+  def self._select_top_indices(vector, target_dimension)
     importance = vector.map(&:abs)
-
     top_dimensions_count = [target_dimension / 5, 1].max
-    top_indices = importance.each_with_index
-                            .sort_by { |val, _| -val }
-                            .first(top_dimensions_count)
-                            .map { |_, idx| idx }
+    importance.each_with_index
+              .sort_by { |val, _| -val }
+              .first(top_dimensions_count)
+              .map { |_, idx| idx }
+  end
 
+  def self._select_uniform_indices(vector, target_dimension, top_indices)
     remaining_count = target_dimension - top_indices.length
+    return [] if remaining_count <= 0
+
     step_size = vector.length.to_f / remaining_count
     uniform_indices = (0...remaining_count).map { |i| (i * step_size).to_i }
+    uniform_indices.reject { |idx| top_indices.include?(idx) }
+  end
 
-    uniform_indices = uniform_indices.reject { |idx| top_indices.include?(idx) }
+  def self._fill_remaining_indices(vector, target_dimension, existing_indices)
+    filled_indices = []
+    current_idx = 0
+    needed_count = target_dimension - existing_indices.length
 
-    while (top_indices.length + uniform_indices.length) < target_dimension
-      idx = 0
-      while top_indices.include?(idx) || uniform_indices.include?(idx)
-        idx += 1
+    while filled_indices.length < needed_count && current_idx < vector.length
+      unless existing_indices.include?(current_idx) || filled_indices.include?(current_idx)
+        filled_indices << current_idx
       end
-      uniform_indices << idx
+      current_idx += 1
     end
-
-    selected_indices = (top_indices + uniform_indices).sort
-
-    selected_indices.first(target_dimension).map { |idx| vector[idx] }
+    filled_indices
   end
 end

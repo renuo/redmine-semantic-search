@@ -1,14 +1,20 @@
+require_relative "semantic_search_result_processor"
+
 class SemanticSearchService
+  include SemanticSearchResultProcessor
+
   def initialize
     @embedding_service = EmbeddingService.new
   end
 
-  def search(query, user, limit = 10, debug = false)
+  def search(query, user, limit = 10, _debug: false)
     Rails.logger.info("Performing semantic search for query: #{query}")
 
     query_embedding, original_dimension = @embedding_service.generate_embedding(query)
 
-    Rails.logger.info("Query embedding generated with dimension: #{query_embedding.length}, original: #{original_dimension}")
+    log_msg = "Query embedding generated with dim: #{query_embedding.length}, " \
+              "original: #{original_dimension}"
+    Rails.logger.info(log_msg)
 
     query_embedding = DimensionReductionService.validate_vector_dimension(
       query_embedding,
@@ -37,17 +43,19 @@ class SemanticSearchService
     sql.gsub(/ARRAY\[.*?\]::vector/, "ARRAY[...vector values...]::vector")
 
     begin
-      results = ActiveRecord::Base.connection.execute(sql)
-      results
-    rescue
+      ActiveRecord::Base.connection.execute(sql)
+    rescue StandardError
       begin
-        db_dimension = ActiveRecord::Base.connection.execute(
-          "SELECT pg_catalog.format_type(atttypid, atttypmod-4) FROM pg_catalog.pg_attribute WHERE attrelid = 'issue_embeddings'::regclass AND attname = 'embedding_vector'"
-        ).first["format_type"]
+        db_dim_query = <<~SQL.squish
+          SELECT pg_catalog.format_type(atttypid, atttypmod-4)
+          FROM pg_catalog.pg_attribute
+          WHERE attrelid = 'issue_embeddings'::regclass AND attname = 'embedding_vector'
+        SQL
+        db_dimension = ActiveRecord::Base.connection.execute(db_dim_query).first["format_type"]
 
         Rails.logger.error("Database column type: #{db_dimension}")
         Rails.logger.error("Provided vector length: #{query_embedding.length}")
-      rescue => debug_error
+      rescue StandardError => debug_error
         Rails.logger.error("Error getting debug info: #{debug_error.message}")
       end
 
@@ -55,8 +63,9 @@ class SemanticSearchService
     end
   end
 
+  # rubocop:disable Metrics/MethodLength
   def build_search_sql(query_embedding, limit)
-    vector_string = query_embedding.join(',')
+    vector_string = query_embedding.join(",")
 
     <<-SQL
       SELECT issue_embeddings.issue_id,
@@ -89,45 +98,7 @@ class SemanticSearchService
       LIMIT #{limit}
     SQL
   end
-
-  def process_results(results)
-    results.map do |result|
-      result = process_author_info(result)
-      result = process_assignee_info(result)
-      result = calculate_similarity_score(result)
-      remove_temporary_fields(result)
-    end
-  end
-
-  def process_author_info(result)
-    result["author_name"] = [result["author_firstname"], result["author_lastname"]].join(" ").strip
-    result["author_name"] = result["author_login"] if result["author_name"].blank?
-    result
-  end
-
-  def process_assignee_info(result)
-    if result["assigned_to_firstname"] || result["assigned_to_lastname"] || result["assigned_to_login"]
-      result["assigned_to_name"] = [result["assigned_to_firstname"], result["assigned_to_lastname"]].join(" ").strip
-      result["assigned_to_name"] = result["assigned_to_login"] if result["assigned_to_name"].blank?
-    else
-      result["assigned_to_name"] = nil
-    end
-    result
-  end
-
-  def calculate_similarity_score(result)
-    distance = result["distance"].to_f
-    result["similarity_score"] = 1.0 / (1.0 + distance)
-    result
-  end
-
-  def remove_temporary_fields(result)
-    %w[author_firstname author_lastname author_login assigned_to_firstname assigned_to_lastname assigned_to_login
-       distance].each do |key|
-      result.delete(key)
-    end
-    result
-  end
+  # rubocop:enable Metrics/MethodLength
 
   def filter_by_visibility(processed_results, user)
     issue_ids = processed_results.map { |r| r["issue_id"] }
