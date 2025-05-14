@@ -24,7 +24,7 @@ class EmbeddingServiceTest < ActiveSupport::TestCase
   end
 
   def test_generate_embedding
-    mock_embedding = Array.new(1536) { rand }
+    mock_embedding = Array.new(2000) { rand }
     mock_response = {
       "data" => [
         {

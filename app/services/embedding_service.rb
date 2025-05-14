@@ -3,7 +3,7 @@ require "ruby/openai"
 class EmbeddingService
   class EmbeddingError < StandardError; end
 
-  MAX_DIMENSION = 1536
+  MAX_DIMENSION = 2000
 
   def initialize
     @client = OpenAI::Client.new(access_token: api_key, uri_base: base_url)
@@ -42,11 +42,9 @@ class EmbeddingService
       768
     when "text-embedding-ada-002" # openai
       1536
-    # rubocop:disable Lint/DuplicateBranch
     else
-      1536
+      2000
     end
-    # rubocop:enable Lint/DuplicateBranch
   end
 
   def prepare_issue_content(issue)

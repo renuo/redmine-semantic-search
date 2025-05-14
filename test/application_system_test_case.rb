@@ -6,7 +6,7 @@ class ApplicationSystemTestCase < ActionDispatch::SystemTestCase
   end
 
   setup do
-    EmbeddingService.any_instance.stubs(:generate_embedding).returns(Array.new(1536) { 0.1 })
+    EmbeddingService.any_instance.stubs(:generate_embedding).returns(Array.new(2000) { 0.1 })
   end
 
   def log_user(login, password)

@@ -48,7 +48,7 @@ class IssueEmbeddingJobTest < ActiveSupport::TestCase
     content_hash = IssueEmbedding.calculate_content_hash(@issue)
     original_embedding = IssueEmbedding.create!(
       issue_id: @issue.id,
-      embedding_vector: [0.1] * 1536,
+      embedding_vector: [0.1] * 2000,
       content_hash: content_hash,
       model_used: 'text-embedding-ada-002'
     )
