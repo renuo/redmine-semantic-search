@@ -1,4 +1,4 @@
-class SemanticSearchService
+class RedmineSemanticSearchService
   def initialize
     @embedding_service = EmbeddingService.new
   end

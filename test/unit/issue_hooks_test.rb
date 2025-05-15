@@ -6,7 +6,7 @@ class IssueHooksTest < ActiveSupport::TestCase
 
   def setup
     @issue = Issue.find(1)
-    @issue_hooks = SemanticSearch::IssueHooks.instance
+    @issue_hooks = RedmineSemanticSearch::IssueHooks.instance
 
     clear_enqueued_jobs
     ActiveJob::Base.queue_adapter = :test

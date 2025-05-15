@@ -26,9 +26,9 @@ class IssueCreationWithEmbeddingTest < Redmine::IntegrationTest
   def test_issue_creation_schedules_embedding_job_when_enabled
     Setting.plugin_redmine_semantic_search = { "enabled" => "1" }
 
-    SemanticSearch::IssueHooks.instance.stubs(:plugin_enabled?).returns(true)
+    RedmineSemanticSearch::IssueHooks.instance.stubs(:plugin_enabled?).returns(true)
 
-    SemanticSearch::IssueHooks.instance.stubs(:schedule_embedding_job).with do |issue_id|
+    RedmineSemanticSearch::IssueHooks.instance.stubs(:schedule_embedding_job).with do |issue_id|
       IssueEmbeddingJob.perform_later(issue_id)
     end
 
@@ -58,13 +58,13 @@ class IssueCreationWithEmbeddingTest < Redmine::IntegrationTest
   def test_issue_creation_does_not_schedule_job_when_disabled
     Setting.plugin_redmine_semantic_search = { "enabled" => "0" }
 
-    original_method = SemanticSearch::IssueHooks.instance.method(:plugin_enabled?)
+    original_method = RedmineSemanticSearch::IssueHooks.instance.method(:plugin_enabled?)
 
-    SemanticSearch::IssueHooks.instance.singleton_class.class_eval do
+    RedmineSemanticSearch::IssueHooks.instance.singleton_class.class_eval do
       define_method(:plugin_enabled?) { false }
     end
 
-    SemanticSearch::IssueHooks.instance.singleton_class.class_eval do
+    RedmineSemanticSearch::IssueHooks.instance.singleton_class.class_eval do
       define_method(:schedule_embedding_job) { |issue_id| nil }
     end
 
@@ -92,7 +92,7 @@ class IssueCreationWithEmbeddingTest < Redmine::IntegrationTest
 
     assert_no_enqueued_jobs
 
-    SemanticSearch::IssueHooks.instance.singleton_class.class_eval do
+    RedmineSemanticSearch::IssueHooks.instance.singleton_class.class_eval do
       define_method(:plugin_enabled?, original_method)
     end
   end

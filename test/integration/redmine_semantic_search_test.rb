@@ -1,6 +1,6 @@
 require File.expand_path('../../test_helper', __FILE__)
 
-class SemanticSearchTest < Redmine::IntegrationTest
+class RedmineSemanticSearchTest < Redmine::IntegrationTest
   include LoginHelpers::Integration
   fixtures :projects, :users, :roles, :members, :member_roles, :issues, :trackers
 
@@ -29,16 +29,16 @@ class SemanticSearchTest < Redmine::IntegrationTest
         'distance' => 0.25
       }
     ]
-    SemanticSearchService.any_instance.stubs(:search).returns(@mock_results)
+    RedmineSemanticSearchService.any_instance.stubs(:search).returns(@mock_results)
 
     Setting.plugin_redmine_semantic_search = { "enabled" => "1" }
 
-    SemanticSearchController.any_instance.stubs(:check_if_enabled).returns(true)
+    RedmineSemanticSearchController.any_instance.stubs(:check_if_enabled).returns(true)
   end
 
   def teardown
     ENV.delete('OPENAI_API_KEY')
-    SemanticSearchController.any_instance.unstub(:check_if_enabled)
+    RedmineSemanticSearchController.any_instance.unstub(:check_if_enabled)
   end
 
   def test_semantic_search_happy_path

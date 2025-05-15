@@ -2,7 +2,7 @@
   border: 1px solid #ddd;
   border-radius: 4px;
   margin-bottom: 15px;
-  padding: 10px 15px;
+  padding: 10px 0;
   background-color: #fff;
 }
 
@@ -11,6 +11,7 @@
   justify-content: space-between;
   align-items: center;
   margin-bottom: 8px;
+  padding: 0 15px;
 }
 
 .search-result-issue .issue-title {
@@ -73,7 +74,7 @@
   color: #555;
 }
 
-#query_form .box {
+#redmine-semantic-search-form .box {
   padding: 15px;
 }
 

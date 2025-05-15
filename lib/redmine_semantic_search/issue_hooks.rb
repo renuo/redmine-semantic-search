@@ -1,4 +1,4 @@
-module SemanticSearch
+module RedmineSemanticSearch
   class IssueHooks < Redmine::Hook::Listener
     include Singleton
 

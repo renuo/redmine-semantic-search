@@ -34,7 +34,7 @@
 
         <% if issue['similarity_score'].present? %>
           <div class="attribute">
-            <span class="label"><%= l(:label_similarity_score) %>:</span>
+            <span class="label"><%= l(:label_redmine_semantic_search_similarity_score) %>:</span>
             <span class="value"><%= number_to_percentage(issue['similarity_score'] * 100, precision: 1) %></span>
           </div>
         <% end %>

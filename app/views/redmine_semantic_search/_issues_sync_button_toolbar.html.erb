@@ -1,7 +1,7 @@
 <% if User.current.admin? %>
   <div style="float: right; margin-right: 10px;">
     <%= form_tag(semantic_search_sync_embeddings_path, method: :post, style: 'display: inline-block;') do %>
-      <%= submit_tag l(:button_sync_embeddings), class: 'button-positive' %>
+      <%= submit_tag l(:button_redmine_semantic_search_sync_embeddings), class: 'button-positive' %>
     <% end %>
   </div>
 <% end %>
