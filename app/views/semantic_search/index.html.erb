@@ -1,7 +1,7 @@
 <%= stylesheet_link_tag 'semantic_search', plugin: 'semantic_search' %>
 
 <div class="contextual">
-  <% if User.current.admin? && Setting.plugin_semantic_search["enabled"] == "1" %>
+  <% if User.current.admin? && Setting.plugin_redmine_semantic_search["enabled"] == "1" %>
     <%= link_to l(:label_settings), { controller: 'settings', action: 'plugin', id: 'semantic_search' }, class: 'icon icon-settings' %>
   <% end %>
 </div>

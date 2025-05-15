@@ -24,7 +24,7 @@ class IssueCreationWithEmbeddingTest < Redmine::IntegrationTest
   end
 
   def test_issue_creation_schedules_embedding_job_when_enabled
-    Setting.plugin_semantic_search = { "enabled" => "1" }
+    Setting.plugin_redmine_semantic_search = { "enabled" => "1" }
 
     SemanticSearch::IssueHooks.instance.stubs(:plugin_enabled?).returns(true)
 
@@ -56,7 +56,7 @@ class IssueCreationWithEmbeddingTest < Redmine::IntegrationTest
   end
 
   def test_issue_creation_does_not_schedule_job_when_disabled
-    Setting.plugin_semantic_search = { "enabled" => "0" }
+    Setting.plugin_redmine_semantic_search = { "enabled" => "0" }
 
     original_method = SemanticSearch::IssueHooks.instance.method(:plugin_enabled?)
 

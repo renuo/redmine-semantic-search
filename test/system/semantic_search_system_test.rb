@@ -48,7 +48,7 @@ class SemanticSearchSystemTest < ApplicationSystemTestCase
 
     SemanticSearchService.any_instance.stubs(:search).returns(mock_result)
 
-    Setting.plugin_semantic_search = { "enabled" => "1" }
+    Setting.plugin_redmine_semantic_search = { "enabled" => "1" }
 
     SemanticSearchController.any_instance.stubs(:check_if_enabled).returns(true)
 
@@ -114,7 +114,7 @@ class SemanticSearchSystemTest < ApplicationSystemTestCase
 
     log_user('admin', 'admin')
 
-    Setting.plugin_semantic_search = Setting.plugin_semantic_search.merge('enabled' => '0')
+    Setting.plugin_redmine_semantic_search = Setting.plugin_redmine_semantic_search.merge('enabled' => '0')
 
     visit '/'
 

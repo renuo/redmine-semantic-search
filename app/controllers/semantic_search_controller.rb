@@ -11,7 +11,7 @@ class SemanticSearchController < ApplicationController
 
     if @question.present?
       search_service = SemanticSearchService.new
-      search_limit = Setting.plugin_semantic_search["search_limit"].to_i
+      search_limit = Setting.plugin_redmine_semantic_search["search_limit"].to_i
       @results = search_service.search(@question, User.current, search_limit)
     end
 
@@ -24,7 +24,7 @@ class SemanticSearchController < ApplicationController
   def sync_embeddings
     issue_count = Issue.count
 
-    if Setting.plugin_semantic_search["enabled"] == "1"
+    if Setting.plugin_redmine_semantic_search["enabled"] == "1"
       SyncEmbeddingsJob.perform_later
       flash[:notice] = l(:notice_sync_embeddings_started, count: issue_count)
     else
@@ -44,7 +44,7 @@ class SemanticSearchController < ApplicationController
 
   def authorize_sync_embeddings
     user = User.current
-    plugin_enabled = Setting.plugin_semantic_search["enabled"] == "1"
+    plugin_enabled = Setting.plugin_redmine_semantic_search["enabled"] == "1"
 
     unless plugin_enabled
       flash[:error] = l(:error_plugin_disabled)
@@ -60,7 +60,7 @@ class SemanticSearchController < ApplicationController
   end
 
   def check_if_enabled
-    unless User.current.admin? || Setting.plugin_semantic_search["enabled"] == "1"
+    unless User.current.admin? || Setting.plugin_redmine_semantic_search["enabled"] == "1"
       render_404
     end
   end

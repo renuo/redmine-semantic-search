@@ -11,7 +11,7 @@ class SyncEmbeddingsJobTest < ActiveSupport::TestCase
   end
 
   def test_job_schedules_issue_jobs_when_enabled
-    Setting.plugin_semantic_search = { "enabled" => "1" }
+    Setting.plugin_redmine_semantic_search = { "enabled" => "1" }
 
     job = SyncEmbeddingsJob.new
     job.perform
@@ -26,7 +26,7 @@ class SyncEmbeddingsJobTest < ActiveSupport::TestCase
   end
 
   def test_job_does_nothing_when_disabled
-    Setting.plugin_semantic_search = { "enabled" => "0" }
+    Setting.plugin_redmine_semantic_search = { "enabled" => "0" }
 
     job = SyncEmbeddingsJob.new
     job.perform

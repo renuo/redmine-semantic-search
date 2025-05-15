@@ -34,7 +34,7 @@ Redmine::Plugin.register :redmine_semantic_search do
        caption: :label_semantic_search,
        if: Proc.new {
          user = User.current
-         Setting.plugin_semantic_search['enabled'] == '1' &&
+         Setting.plugin_redmine_semantic_search['enabled'] == '1' &&
            user.logged? &&
            user.allowed_to?(:use_semantic_search, nil, global: true)
        }

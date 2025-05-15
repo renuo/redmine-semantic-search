@@ -14,6 +14,6 @@ class SyncEmbeddingsJob < ActiveJob::Base
   private
 
   def plugin_enabled?
-    Setting.plugin_semantic_search["enabled"] == "1"
+    Setting.plugin_redmine_semantic_search["enabled"] == "1"
   end
 end

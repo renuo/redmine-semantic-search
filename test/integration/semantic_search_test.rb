@@ -31,7 +31,7 @@ class SemanticSearchTest < Redmine::IntegrationTest
     ]
     SemanticSearchService.any_instance.stubs(:search).returns(@mock_results)
 
-    Setting.plugin_semantic_search = { "enabled" => "1" }
+    Setting.plugin_redmine_semantic_search = { "enabled" => "1" }
 
     SemanticSearchController.any_instance.stubs(:check_if_enabled).returns(true)
   end
