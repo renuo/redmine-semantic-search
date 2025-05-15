@@ -11,12 +11,12 @@ $LOAD_PATH.unshift(lib_dir.to_s) unless $LOAD_PATH.include?(lib_dir.to_s)
 require_dependency "semantic_search/issue_hooks"
 require_dependency "semantic_search/hooks/view_hooks"
 
-Redmine::Plugin.register :semantic_search do
+Redmine::Plugin.register :redmine_semantic_search do
   name "Semantic Search"
   author "Sami Hindi @ Renuo"
   description "This redmine plugin allows you to search issues using natural language, by storing the issue content in a vector database."
   version "0.0.1"
-  url "https://github.com/renuo/redmine-semantic-search"
+  url "https://github.com/renuo/redmine_semantic_search"
   author_url "https://github.com/renuo"
 
   settings default: {
