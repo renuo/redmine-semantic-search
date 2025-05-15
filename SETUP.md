@@ -51,7 +51,7 @@ RAILS_ENV=production bundle exec rails server
 > [!IMPORTANT]
 > The semantic search plugin is disabled by default, so make sure to enable it in the [plugin settings](http://localhost:3000/settings/plugin/redmine_semantic_search).
 
-Now, yhou can start assigning roles & permissions, to who can use the semantic search (this includes the syncing of all existing issues).
+Now you can assign roles and permissions to determine who can use the semantic search feature.
 
 You can do this in by going to the Role you want to change the permissions for, then selecting the checkbox "Use semantic search" under the section "Redmine semantic search":
 
@@ -135,3 +135,5 @@ RAILS_ENV=production bundle exec rails server
 8. Visit `http://localhost:3000` in your browser, and enter `admin` as the login and `admin` as the password.
 
 9. Next you will be prompted to change your password, choose one and write it down for later.
+
+10. As of now, it is recommended to create a project and add a couple of issues to it, so testing the Semantic Search actually becomes feasible.
