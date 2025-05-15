@@ -57,6 +57,33 @@ You can do this in by going to the Role you want to change the permissions for, 
 
 ![Checkbox Showcase](repo/checkbox-showcase.gif)
 
+At this point, you are ready to test the actual functionality of the plugin.
+
+First, make sure you have at least 4 issues, so search results actually make sense.
+
+In order to locally test the plugin, I recommend using `ollama`, so no credits on the OpenAI API have to be wasted. You can install and configure `ollama` by executing the following commands:
+
+```bash
+brew install ollama
+brew services start ollama
+ollama pull nomic-embed-text:latest # will start on port 11434
+```
+
+Then go into the plugin settings at `http://localhost:3000/settings/plugin/redmine_semantic_search` and enter the following details:
+
+- Base URL: `http://localhost:11434/v1`
+- Embedding Model: `nomic-embed-text:latest`
+
+The environment variable `OPENAI_API_KEY` has to be set to `ollama` in order for the connection to work effectively.
+
+Once you've done that, navigate to the Projects Page ([http://localhost:3000/projects](http://localhost:3000/projects)), and click on the button "Sync Embeddings" on the end of the toolbar:
+
+![Sync Embeddings Showcase](repo/sync-showcase.gif)
+
+Wait a couple seconds, then navigate to the "Semantic Search" tab in the navbar and test the plugin by entering a keyword from the previously created issues. They will show in the search results with an according similarity score.
+
+![Search Results](repo/results.png)
+
 # Setting up Redmine
 
 If you haven't set up Redmine, refer to this guide.
