@@ -13,7 +13,7 @@ class IssueEmbeddingJobTest < ActiveSupport::TestCase
   end
 
   def test_job_creates_embedding_when_enabled
-    Setting.plugin_semantic_search = {
+    Setting.plugin_redmine_semantic_search = {
       "enabled" => "1",
       "embedding_model" => "text-embedding-ada-002"
     }
@@ -27,7 +27,7 @@ class IssueEmbeddingJobTest < ActiveSupport::TestCase
   end
 
   def test_job_does_nothing_when_disabled
-    Setting.plugin_semantic_search = {
+    Setting.plugin_redmine_semantic_search = {
       "enabled" => "0",
       "embedding_model" => "text-embedding-ada-002"
     }
@@ -40,7 +40,7 @@ class IssueEmbeddingJobTest < ActiveSupport::TestCase
   end
 
   def test_job_does_not_update_unchanged_embedding
-    Setting.plugin_semantic_search = {
+    Setting.plugin_redmine_semantic_search = {
       "enabled" => "1",
       "embedding_model" => "text-embedding-ada-002"
     }

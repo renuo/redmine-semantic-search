@@ -19,12 +19,12 @@ class IssueEmbeddingJob < ActiveJob::Base
   private
 
   def plugin_enabled?
-    Setting.plugin_semantic_search["enabled"] == "1"
+    Setting.plugin_redmine_semantic_search["enabled"] == "1"
   end
 
   def embedding_needs_update?(embedding, new_content_hash)
     embedding.content_hash != new_content_hash ||
-      embedding.model_used != Setting.plugin_semantic_search["embedding_model"]
+      embedding.model_used != Setting.plugin_redmine_semantic_search["embedding_model"]
   end
 
   def update_embedding(issue, embedding, content_hash)
@@ -35,7 +35,7 @@ class IssueEmbeddingJob < ActiveJob::Base
 
       embedding.embedding_vector = vector
       embedding.content_hash = content_hash
-      embedding.model_used = Setting.plugin_semantic_search["embedding_model"]
+      embedding.model_used = Setting.plugin_redmine_semantic_search["embedding_model"]
       embedding.save!
 
       Rails.logger.info("=> [SEMANTIC_SEARCH] Successfully generated embedding for Issue ##{issue.id}")

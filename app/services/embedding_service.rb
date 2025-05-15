@@ -66,10 +66,10 @@ class EmbeddingService
   end
 
   def base_url
-    Setting.plugin_semantic_search["base_url"] || "https://api.openai.com/v1"
+    Setting.plugin_redmine_semantic_search["base_url"] || "https://api.openai.com/v1"
   end
 
   def embedding_model
-    Setting.plugin_semantic_search["embedding_model"] || "text-embedding-ada-002"
+    Setting.plugin_redmine_semantic_search["embedding_model"] || "text-embedding-ada-002"
   end
 end

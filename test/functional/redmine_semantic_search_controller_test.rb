@@ -1,6 +1,6 @@
 require File.expand_path('../../test_helper', __FILE__)
 
-class SemanticSearchControllerTest < Redmine::ControllerTest
+class RedmineSemanticSearchControllerTest < Redmine::ControllerTest
   include ActiveJob::TestHelper
   include ApplicationHelper
   fixtures :projects, :users, :roles, :members, :member_roles, :issues, :trackers
@@ -10,14 +10,14 @@ class SemanticSearchControllerTest < Redmine::ControllerTest
     Role.find(1).add_permission! :use_semantic_search
 
     # Enable the plugin by default for most tests
-    Setting.plugin_semantic_search = { "enabled" => "1" }
+    Setting.plugin_redmine_semantic_search = { "enabled" => "1" }
   end
 
   def test_index
     get :index
     assert_response :success
     assert_select 'h2', 'Semantic Search'
-    assert_select 'form#semantic-search-form'
+    assert_select 'form#redmine-semantic-search-form'
   end
 
   def test_index_with_query
@@ -38,9 +38,9 @@ class SemanticSearchControllerTest < Redmine::ControllerTest
       }
     ]
 
-    search_service = mock('SemanticSearchService')
+    search_service = mock('RedmineSemanticSearchService')
     search_service.stubs(:search).returns(search_results)
-    SemanticSearchService.stubs(:new).returns(search_service)
+    RedmineSemanticSearchService.stubs(:new).returns(search_service)
 
     get :index, params: { q: 'test query' }
     assert_response :success
@@ -57,18 +57,18 @@ class SemanticSearchControllerTest < Redmine::ControllerTest
     end
 
     assert_redirected_to controller: 'issues', action: 'index'
-    assert_equal l(:notice_sync_embeddings_started, count: Issue.count), flash[:notice]
+    assert_equal l(:notice_redmine_semantic_search_sync_embeddings_started, count: Issue.count), flash[:notice]
   end
 
   def test_sync_embeddings_when_disabled
-    Setting.plugin_semantic_search = { "enabled" => "0" }
+    Setting.plugin_redmine_semantic_search = { "enabled" => "0" }
 
     assert_no_enqueued_jobs do
       post :sync_embeddings
     end
 
     assert_redirected_to controller: 'issues', action: 'index'
-    assert_equal l(:error_plugin_disabled), flash[:error]
+    assert_equal l(:error_redmine_semantic_search_plugin_disabled), flash[:error]
   end
 
   def test_non_admin_cannot_sync_embeddings
@@ -84,7 +84,7 @@ class SemanticSearchControllerTest < Redmine::ControllerTest
   end
 
   def test_manager_cannot_access_search_when_disabled
-    Setting.plugin_semantic_search = { "enabled" => "0" }
+    Setting.plugin_redmine_semantic_search = { "enabled" => "0" }
 
     @request.session[:user_id] = 2
     get :index
@@ -92,7 +92,7 @@ class SemanticSearchControllerTest < Redmine::ControllerTest
   end
 
   def test_admin_can_access_search_when_disabled
-    Setting.plugin_semantic_search = { "enabled" => "0" }
+    Setting.plugin_redmine_semantic_search = { "enabled" => "0" }
 
     @request.session[:user_id] = 1
     get :index

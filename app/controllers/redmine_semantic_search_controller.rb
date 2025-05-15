@@ -1,4 +1,4 @@
-class SemanticSearchController < ApplicationController
+class RedmineSemanticSearchController < ApplicationController
   before_action :require_login
   before_action :authorize_semantic_search
   before_action :authorize_sync_embeddings, only: [:sync_embeddings]
@@ -10,8 +10,8 @@ class SemanticSearchController < ApplicationController
     @results = []
 
     if @question.present?
-      search_service = SemanticSearchService.new
-      search_limit = Setting.plugin_semantic_search["search_limit"].to_i
+      search_service = RedmineSemanticSearchService.new
+      search_limit = Setting.plugin_redmine_semantic_search["search_limit"].to_i
       @results = search_service.search(@question, User.current, search_limit)
     end
 
@@ -24,11 +24,11 @@ class SemanticSearchController < ApplicationController
   def sync_embeddings
     issue_count = Issue.count
 
-    if Setting.plugin_semantic_search["enabled"] == "1"
+    if Setting.plugin_redmine_semantic_search["enabled"] == "1"
       SyncEmbeddingsJob.perform_later
-      flash[:notice] = l(:notice_sync_embeddings_started, count: issue_count)
+      flash[:notice] = l(:notice_redmine_semantic_search_sync_embeddings_started, count: issue_count)
     else
-      flash[:error] = l(:error_plugin_disabled)
+      flash[:error] = l(:error_redmine_semantic_search_plugin_disabled)
     end
 
     redirect_back(fallback_location: { controller: "issues", action: "index" })
@@ -44,10 +44,10 @@ class SemanticSearchController < ApplicationController
 
   def authorize_sync_embeddings
     user = User.current
-    plugin_enabled = Setting.plugin_semantic_search["enabled"] == "1"
+    plugin_enabled = Setting.plugin_redmine_semantic_search["enabled"] == "1"
 
     unless plugin_enabled
-      flash[:error] = l(:error_plugin_disabled)
+      flash[:error] = l(:error_redmine_semantic_search_plugin_disabled)
       redirect_back(fallback_location: { controller: "issues", action: "index" })
       return
     end
@@ -60,7 +60,7 @@ class SemanticSearchController < ApplicationController
   end
 
   def check_if_enabled
-    unless User.current.admin? || Setting.plugin_semantic_search["enabled"] == "1"
+    unless User.current.admin? || Setting.plugin_redmine_semantic_search["enabled"] == "1"
       render_404
     end
   end

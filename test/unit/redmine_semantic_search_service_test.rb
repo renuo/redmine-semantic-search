@@ -1,13 +1,13 @@
 require File.expand_path('../../test_helper', __FILE__)
 
-class SemanticSearchServiceTest < ActiveSupport::TestCase
+class RedmineSemanticSearchServiceTest < ActiveSupport::TestCase
   fixtures :issues, :users, :projects, :trackers, :issue_statuses, :enumerations, :journals, :time_entries
 
   def setup
     @mock_embedding_service = mock('EmbeddingService')
     EmbeddingService.stubs(:new).returns(@mock_embedding_service)
 
-    @service = SemanticSearchService.new
+    @service = RedmineSemanticSearchService.new
     @user = User.find(1)
     @query = "test search query"
     @query_embedding = Array.new(2000) { rand }

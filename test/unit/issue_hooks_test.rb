@@ -6,14 +6,14 @@ class IssueHooksTest < ActiveSupport::TestCase
 
   def setup
     @issue = Issue.find(1)
-    @issue_hooks = SemanticSearch::IssueHooks.instance
+    @issue_hooks = RedmineSemanticSearch::IssueHooks.instance
 
     clear_enqueued_jobs
     ActiveJob::Base.queue_adapter = :test
   end
 
   def test_hooks_schedule_job_when_enabled
-    Setting.plugin_semantic_search = { "enabled" => "1" }
+    Setting.plugin_redmine_semantic_search = { "enabled" => "1" }
 
     @issue_hooks.define_singleton_method(:schedule_embedding_job) do |issue_id|
       IssueEmbeddingJob.perform_later(issue_id)
@@ -60,9 +60,9 @@ class IssueHooksTest < ActiveSupport::TestCase
   end
 
   def test_hooks_do_not_schedule_job_when_disabled
-    Setting.plugin_semantic_search = { "enabled" => "0" }
+    Setting.plugin_redmine_semantic_search = { "enabled" => "0" }
 
-    assert_equal "0", Setting.plugin_semantic_search["enabled"]
+    assert_equal "0", Setting.plugin_redmine_semantic_search["enabled"]
 
     # Stub plugin_enabled? to return false
     @issue_hooks.define_singleton_method(:plugin_enabled?) do

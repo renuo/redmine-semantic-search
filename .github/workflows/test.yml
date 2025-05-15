@@ -48,10 +48,25 @@ jobs:
           path: redmine
           ref: ${{ matrix.redmine_version }}
 
+      - name: Clean plugin directory before checkout
+        working-directory: redmine
+        run: |
+          echo "Cleaning plugin directories..."
+          if [ -d "plugins" ]; then
+            echo "Removing plugins/semantic_search..."
+            rm -rf plugins/semantic_search
+            echo "Removing plugins/redmine_semantic_search..."
+            rm -rf plugins/redmine_semantic_search
+          else
+            echo "Plugins directory does not exist, creating for plugin checkout..."
+            mkdir -p plugins
+          fi
+          echo "Plugin directory cleaning complete."
+
       - name: Checkout plugin
         uses: actions/checkout@v4
         with:
-          path: redmine/plugins/semantic_search
+          path: redmine/plugins/redmine_semantic_search
           ref: ${{ github.head_ref || github.ref_name }}
 
       - name: Set up Ruby
@@ -116,4 +131,4 @@ jobs:
       - name: Run tests
         working-directory: redmine
         run: |
-          bundle exec rake redmine:plugins:test NAME=semantic_search
+          bundle exec rake redmine:plugins:test NAME=redmine_semantic_search

@@ -1,6 +1,6 @@
 require File.expand_path('../../application_system_test_case', __FILE__)
 
-class SemanticSearchSystemTest < ApplicationSystemTestCase
+class RedmineSemanticSearchSystemTest < ApplicationSystemTestCase
   fixtures :projects, :users, :roles, :members, :member_roles, :trackers
 
   def setup
@@ -46,11 +46,11 @@ class SemanticSearchSystemTest < ApplicationSystemTestCase
       "similarity_score" => 0.95
     }]
 
-    SemanticSearchService.any_instance.stubs(:search).returns(mock_result)
+    RedmineSemanticSearchService.any_instance.stubs(:search).returns(mock_result)
 
-    Setting.plugin_semantic_search = { "enabled" => "1" }
+    Setting.plugin_redmine_semantic_search = { "enabled" => "1" }
 
-    SemanticSearchController.any_instance.stubs(:check_if_enabled).returns(true)
+    RedmineSemanticSearchController.any_instance.stubs(:check_if_enabled).returns(true)
 
     logout
     log_user(@user.login, 'jsmith')
@@ -60,18 +60,18 @@ class SemanticSearchSystemTest < ApplicationSystemTestCase
     ENV.delete('OPENAI_API_KEY')
     @embedding.destroy if @embedding && IssueEmbedding.exists?(@embedding.id)
     @issue.destroy if @issue && Issue.exists?(@issue.id)
-    SemanticSearchController.any_instance.unstub(:check_if_enabled)
+    RedmineSemanticSearchController.any_instance.unstub(:check_if_enabled)
   end
 
   test "semantic search end-to-end happy path" do
     visit '/semantic_search'
 
     assert_selector 'h2', text: 'Semantic Search'
-    assert_selector 'form#semantic-search-form'
+    assert_selector 'form#redmine-semantic-search-form'
 
-    within '#semantic-search-form' do
+    within '#redmine-semantic-search-form' do
       fill_in 'q', with: 'test query about bug issues'
-      click_button 'Search'
+      click_button 'Search', wait: 3
     end
 
     assert_selector 'dl#search-results-list', wait: 3
@@ -86,21 +86,21 @@ class SemanticSearchSystemTest < ApplicationSystemTestCase
   end
 
   test "semantic search with empty results" do
-    SemanticSearchService.any_instance.unstub(:search)
-    SemanticSearchService.any_instance.stubs(:search).returns([])
+    RedmineSemanticSearchService.any_instance.unstub(:search)
+    RedmineSemanticSearchService.any_instance.stubs(:search).returns([])
 
     visit '/semantic_search'
 
-    within '#semantic-search-form' do
+    within '#redmine-semantic-search-form' do
       fill_in 'q', with: 'query with no results'
-      click_button 'Search'
+      click_button 'Search', wait: 3
     end
 
     assert_selector 'p.nodata', wait: 3
   end
 
   test "semantic search page is accessible only to authorized users" do
-    SemanticSearchController.any_instance.unstub(:check_if_enabled)
+    RedmineSemanticSearchController.any_instance.unstub(:check_if_enabled)
 
     Capybara.reset_sessions!
 
@@ -114,7 +114,7 @@ class SemanticSearchSystemTest < ApplicationSystemTestCase
 
     log_user('admin', 'admin')
 
-    Setting.plugin_semantic_search = Setting.plugin_semantic_search.merge('enabled' => '0')
+    Setting.plugin_redmine_semantic_search = Setting.plugin_redmine_semantic_search.merge('enabled' => '0')
 
     visit '/'
 
