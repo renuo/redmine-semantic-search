@@ -39,7 +39,7 @@ Redmine::Plugin.register :redmine_semantic_search do
            user.allowed_to?(:use_semantic_search, nil, global: true)
        }
 
-  menu :application_menu, :sync_embeddings,
+  menu :application_menu, :redmine_semantic_search_sync_embeddings,
        { controller: "semantic_search", action: "sync_embeddings" },
        caption: :button_sync_embeddings,
        html: { method: :post },
