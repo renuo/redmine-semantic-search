@@ -19,10 +19,10 @@ For the rendered Mermaid Domain Model, have a look at [this file](repo/domain_mo
 
 ## Requirements
 
-- Redmine 5.1.x or 6.0.x
-- PostgreSQL 12+ with pgvector extension installed
-- Ruby 3.2.x
+- PostgreSQL installed
 - Valid OpenAI API key
+
+More information in [Setup Guide](#installation).
 
 ## Installation
 
