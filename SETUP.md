@@ -35,9 +35,8 @@ bundle install
 After the plugin's dependencies are installed, navigate back to your Redmine root directory. From the Redmine root, run the plugin's database migrations:
 
 ```bash
-cd ../.. # This command takes you from 'plugins/redmine_semantic_search' to the Redmine root.
-         # Ensure you are in the Redmine root directory before running the next command.
-RAILS_ENV=production bin/rake redmine:plugins:migrate NAME=redmine_semantic_search
+cd ../..
+RAILS_ENV=production bundle exec rake redmine:plugins:migrate NAME=redmine_semantic_search
 ```
 
 Finally, restart your Redmine application server for the plugin to be loaded and active.
