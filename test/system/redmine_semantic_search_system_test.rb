@@ -71,7 +71,7 @@ class RedmineSemanticSearchSystemTest < ApplicationSystemTestCase
 
     within '#redmine-semantic-search-form' do
       fill_in 'q', with: 'test query about bug issues'
-      click_button 'Search'
+      click_button 'Search', wait: 3
     end
 
     assert_selector 'dl#search-results-list', wait: 3
@@ -93,7 +93,7 @@ class RedmineSemanticSearchSystemTest < ApplicationSystemTestCase
 
     within '#redmine-semantic-search-form' do
       fill_in 'q', with: 'query with no results'
-      click_button 'Search'
+      click_button 'Search', wait: 3
     end
 
     assert_selector 'p.nodata', wait: 3
