@@ -6,7 +6,8 @@ This Guide will give you a step-by-step Tutorial on how to set this Plugin up.
 
 Before we get started, make sure you have the following done already.
 
-✅ An Enviornment Variable called `OPENAI_API_KEY`, with your OpenAI API Key. Get it [here](https://platform.openai.com/api-keys).
+✅ Optional: Your OpenAI API Key. Get it [here](https://platform.openai.com/api-keys).
+<br />
 ✅ A valid Redmine 5.1 or 6.0 instance (see [Setting Up Redmine](#setting-up-redmine))
 
 # Plugin Setup
@@ -21,7 +22,7 @@ git clone https://github.com/renuo/redmine_semantic_search plugins/redmine_seman
 Next, install the required system-wide dependencies (this will install both `postgresql` and `pgvector` if you don't have them):
 
 ```bash
-brew install postgresql pgvector
+brew install postgresql@16 pgvector
 ```
 
 Then, navigate into the newly cloned plugin's directory and install its specific Ruby dependencies using Bundler:
@@ -79,25 +80,16 @@ Then paste in the following contents:
 production:
   adapter: postgresql
   database: redmine
-  host: localhost
-  username: postgres
-  password: "postgres"
   encoding: unicode
 
 development:
   adapter: postgresql
   database: redmine_development
-  host: localhost
-  username: postgres
-  password: "postgres"
   encoding: unicode
 
 test:
   adapter: postgresql
   database: redmine_test
-  host: localhost
-  username: postgres
-  password: "postgres"
   encoding: unicode
 ```
 
@@ -117,7 +109,7 @@ bundle install
 
 ```bash
 export RAILS_ENV=production
-bundle exec rake generate_secret_toke
+bundle exec rake generate_secret_token
 bundle exec rake db:create
 bundle exec rake db:migrate
 bundle exec rake redmine:load_default_data
@@ -132,3 +124,20 @@ RAILS_ENV=production bundle exec rails server
 8. Visit `http://localhost:3000` in your browser, and enter `admin` as the login and `admin` as the password.
 
 9. Next you will be prompted to change your password, choose one and write it down for later.
+
+## Ollama setup
+
+```bash
+brew install ollama
+brew services start ollama
+ollama pull nomic-embed-text:latest
+ollama serve
+```
+
+# Todo:
+
+- [ ] Add bin/setup script
+- [ ] Guide to add test data
+- [ ] Tell that it's disabled by default
+- [ ] Remove useless checkboxes
+- [ ] Let user know about how to configure ollama
