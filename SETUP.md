@@ -11,11 +11,41 @@ Before we get started, make sure you have the following done already.
 
 # Plugin Setup
 
-First, clone the plugin repository into the `plugins` directory of your redmine instance.
+First, clone the plugin repository into the `plugins` directory of your Redmine instance.
+It's assumed you are in your Redmine root directory when you run the following command:
 
 ```bash
 git clone https://github.com/renuo/redmine_semantic_search plugins/redmine_semantic_search
+```
+
+Next, install the required system-wide dependencies (this will install both `postgresql` and `pgvector` if you don't have them):
+
+```bash
+brew install postgresql pgvector
+```
+
+Then, navigate into the newly cloned plugin's directory and install its specific Ruby dependencies using Bundler:
+
+```bash
 cd plugins/redmine_semantic_search
+bundle install
+```
+
+After the plugin's dependencies are installed, navigate back to your Redmine root directory. From the Redmine root, run the plugin's database migrations:
+
+```bash
+cd ../.. # This command takes you from 'plugins/redmine_semantic_search' to the Redmine root.
+         # Ensure you are in the Redmine root directory before running the next command.
+RAILS_ENV=production bin/rake redmine:plugins:migrate NAME=redmine_semantic_search
+```
+
+Finally, restart your Redmine application server for the plugin to be loaded and active.
+If you are running the standard Rails development server, you can typically stop it (usually with `Ctrl+C` in the terminal where it's running) and then restart it. For example:
+
+```bash
+# Stop your current server (e.g., Ctrl+C)
+# Then restart it, for example:
+RAILS_ENV=production bundle exec rails server
 ```
 
 # Setting up Redmine
