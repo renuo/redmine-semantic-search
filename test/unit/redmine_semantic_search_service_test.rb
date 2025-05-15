@@ -69,6 +69,135 @@ class RedmineSemanticSearchServiceTest < ActiveSupport::TestCase
     end
 
     assert_in_delta 0.909, result['similarity_score'], 0.001
+
+    if issue.assigned_to
+      expected_assignee_name = [issue.assigned_to.firstname, issue.assigned_to.lastname].join(" ").strip
+      expected_assignee_name = issue.assigned_to.login if expected_assignee_name.blank?
+      assert_equal expected_assignee_name, result['assigned_to_name']
+    else
+      assert_nil result['assigned_to_name']
+    end
+  end
+
+  def test_search_processes_author_info_with_login_fallback
+    @mock_embedding_service.expects(:generate_embedding).with(@query).returns(@query_embedding)
+
+    issue = Issue.find(1) # Base issue for common fields
+
+    mock_raw_result = {
+      'issue_id' => issue.id.to_s,
+      'subject' => issue.subject,
+      'description' => issue.description,
+      'project_name' => issue.project.name,
+      'created_on' => issue.created_on.to_s,
+      'updated_on' => issue.updated_on.to_s,
+      'tracker_id' => issue.tracker_id.to_s,
+      'tracker_name' => issue.tracker.name,
+      'status_name' => issue.status.name,
+      'priority_name' => issue.priority.name,
+      'author_firstname' => nil, # Key for this test branch
+      'author_lastname' => nil,  # Key for this test branch
+      'author_login' => 'fallback_author_login', # Key for this test branch
+      'assigned_to_firstname' => issue.assigned_to&.firstname,
+      'assigned_to_lastname' => issue.assigned_to&.lastname,
+      'assigned_to_login' => issue.assigned_to&.login,
+      'distance' => '0.1'
+    }
+    ActiveRecord::Base.connection.stubs(:execute).returns([mock_raw_result])
+
+    # Mock visibility check to pass the result through
+    mock_relation = mock('ActiveRecord::Relation')
+    Issue.expects(:where).with(id: [issue.id.to_s]).returns(mock_relation)
+    mock_relation.expects(:visible).with(@user).returns([issue])
+
+    results = @service.search(@query, @user)
+    assert_equal 1, results.size
+    result = results.first
+
+    assert_equal 'fallback_author_login', result['author_name']
+    assert_nil result['author_firstname']
+    assert_nil result['author_lastname']
+    assert_nil result['author_login'] # Ensure original login field is removed
+  end
+
+  def test_search_processes_assignee_info_as_nil_if_no_details
+    @mock_embedding_service.expects(:generate_embedding).with(@query).returns(@query_embedding)
+
+    issue = Issue.find(1) # Base issue
+
+    mock_raw_result = {
+      'issue_id' => issue.id.to_s,
+      'subject' => issue.subject,
+      'description' => issue.description,
+      'project_name' => issue.project.name,
+      'created_on' => issue.created_on.to_s,
+      'updated_on' => issue.updated_on.to_s,
+      'tracker_id' => issue.tracker_id.to_s,
+      'tracker_name' => issue.tracker.name,
+      'status_name' => issue.status.name,
+      'priority_name' => issue.priority.name,
+      'author_firstname' => issue.author.firstname,
+      'author_lastname' => issue.author.lastname,
+      'author_login' => issue.author.login,
+      'assigned_to_firstname' => nil, # Key for this test branch
+      'assigned_to_lastname' => nil,  # Key for this test branch
+      'assigned_to_login' => nil,     # Key for this test branch
+      'distance' => '0.1'
+    }
+    ActiveRecord::Base.connection.stubs(:execute).returns([mock_raw_result])
+
+    mock_relation = mock('ActiveRecord::Relation')
+    Issue.expects(:where).with(id: [issue.id.to_s]).returns(mock_relation)
+    mock_relation.expects(:visible).with(@user).returns([issue])
+
+    results = @service.search(@query, @user)
+    assert_equal 1, results.size
+    result = results.first
+
+    assert_nil result['assigned_to_name']
+    assert_nil result['assigned_to_firstname']
+    assert_nil result['assigned_to_lastname']
+    assert_nil result['assigned_to_login']
+  end
+
+  def test_search_processes_assignee_info_with_login_fallback
+    @mock_embedding_service.expects(:generate_embedding).with(@query).returns(@query_embedding)
+
+    issue = Issue.find(1) # Base issue
+
+    mock_raw_result = {
+      'issue_id' => issue.id.to_s,
+      'subject' => issue.subject,
+      'description' => issue.description,
+      'project_name' => issue.project.name,
+      'created_on' => issue.created_on.to_s,
+      'updated_on' => issue.updated_on.to_s,
+      'tracker_id' => issue.tracker_id.to_s,
+      'tracker_name' => issue.tracker.name,
+      'status_name' => issue.status.name,
+      'priority_name' => issue.priority.name,
+      'author_firstname' => issue.author.firstname,
+      'author_lastname' => issue.author.lastname,
+      'author_login' => issue.author.login,
+      'assigned_to_firstname' => nil, # Key for this test branch
+      'assigned_to_lastname' => nil,  # Key for this test branch
+      'assigned_to_login' => 'fallback_assignee_login', # Key for this test branch
+      'distance' => '0.1'
+    }
+    ActiveRecord::Base.connection.stubs(:execute).returns([mock_raw_result])
+
+    mock_relation = mock('ActiveRecord::Relation')
+    Issue.expects(:where).with(id: [issue.id.to_s]).returns(mock_relation)
+    mock_relation.expects(:visible).with(@user).returns([issue])
+
+    results = @service.search(@query, @user)
+    assert_equal 1, results.size
+    result = results.first
+
+    assert_equal 'fallback_assignee_login', result['assigned_to_name']
+    assert_nil result['assigned_to_firstname']
+    assert_nil result['assigned_to_lastname']
+    assert_nil result['assigned_to_login'] # Ensure original login field is removed
   end
 
   def test_filter_by_visibility

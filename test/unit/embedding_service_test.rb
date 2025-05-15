@@ -104,4 +104,156 @@ class EmbeddingServiceTest < ActiveSupport::TestCase
     assert_includes content, "Comment: Test comment"
     assert_includes content, "Time entry note: Test time entry comment"
   end
+
+  def test_pad_embedding_nil_vector
+    assert_nil @service.pad_embedding(nil)
+  end
+
+  def test_pad_embedding_vector_gt_max_dimension
+    vector = Array.new(EmbeddingService::MAX_DIMENSION + 1, 1.0)
+    assert_equal vector, @service.pad_embedding(vector)
+  end
+
+  def test_pad_embedding_vector_eq_max_dimension
+    vector = Array.new(EmbeddingService::MAX_DIMENSION, 1.0)
+    assert_equal vector, @service.pad_embedding(vector)
+  end
+
+  def test_pad_embedding_vector_lt_max_dimension
+    vector = [1.0, 2.0]
+    expected_vector = [1.0, 2.0] + Array.new(EmbeddingService::MAX_DIMENSION - 2, 0.0)
+    assert_equal expected_vector, @service.pad_embedding(vector)
+  end
+
+  def test_model_dimensions_nomic
+    original_settings = Setting.plugin_redmine_semantic_search
+    Setting.plugin_redmine_semantic_search = { "embedding_model" => "nomic-embed-text" }
+    assert_equal 768, @service.model_dimensions
+  ensure
+    Setting.plugin_redmine_semantic_search = original_settings
+  end
+
+  def test_model_dimensions_openai
+    original_settings = Setting.plugin_redmine_semantic_search
+    Setting.plugin_redmine_semantic_search = { "embedding_model" => "text-embedding-ada-002" }
+    assert_equal 1536, @service.model_dimensions
+  ensure
+    Setting.plugin_redmine_semantic_search = original_settings
+  end
+
+  def test_model_dimensions_default_unknown_model
+    original_settings = Setting.plugin_redmine_semantic_search
+    Setting.plugin_redmine_semantic_search = { "embedding_model" => "unknown-model" }
+    assert_equal 2000, @service.model_dimensions
+  ensure
+    Setting.plugin_redmine_semantic_search = original_settings
+  end
+
+  def test_model_dimensions_setting_key_not_present
+    original_settings = Setting.plugin_redmine_semantic_search
+    Setting.plugin_redmine_semantic_search = {}
+    assert_equal 1536, @service.model_dimensions # Defaults to "text-embedding-ada-002"
+  ensure
+    Setting.plugin_redmine_semantic_search = original_settings
+  end
+
+  def test_model_dimensions_settings_are_nil
+    original_settings = Setting.plugin_redmine_semantic_search
+    Setting.plugin_redmine_semantic_search = nil
+    assert_equal 1536, @service.model_dimensions # Defaults to "text-embedding-ada-002"
+  ensure
+    Setting.plugin_redmine_semantic_search = original_settings
+  end
+
+  def test_prepare_issue_content_with_minimal_data
+    issue = Issue.new(id: 123, subject: 'Minimal Subject')
+    issue.description = nil
+    issue.stubs(:journals).returns([])
+    issue.stubs(:time_entries).returns([])
+
+    expected_content = "Issue #123 - Minimal Subject\nDescription:"
+    assert_equal expected_content, @service.prepare_issue_content(issue)
+  end
+
+  def test_prepare_issue_content_with_empty_and_nil_journal_notes
+    issue = Issue.find(1)
+    issue.journals.destroy_all
+    issue.update_columns(subject: 'Journal Test', description: 'Journal test desc')
+
+    Journal.create!(journalized: issue, user_id: 2, notes: nil)
+    Journal.create!(journalized: issue, user_id: 2, notes: '')
+    Journal.create!(journalized: issue, user_id: 2, notes: 'Actual comment')
+
+    issue.reload
+    issue.stubs(:time_entries).returns([])
+
+    content = @service.prepare_issue_content(issue)
+    assert_includes content, "Issue ##{issue.id} - Journal Test"
+    assert_includes content, "Description: Journal test desc"
+    assert_includes content, "Comment: Actual comment"
+    assert_equal 1, content.scan(/Comment:/).count
+    assert_equal 3, content.lines.count
+  end
+
+  def test_prepare_issue_content_with_empty_and_nil_time_entry_comments
+    issue = Issue.find(1)
+    issue.time_entries.destroy_all
+    issue.update_columns(subject: 'Time Entry Test', description: 'Time entry test desc')
+
+    TimeEntry.create!(project_id: issue.project_id, user_id: 2, issue_id: issue.id, hours: 1, activity_id: 9, spent_on: Date.today, comments: nil)
+    TimeEntry.create!(project_id: issue.project_id, user_id: 2, issue_id: issue.id, hours: 1, activity_id: 9, spent_on: Date.today, comments: '')
+    TimeEntry.create!(project_id: issue.project_id, user_id: 2, issue_id: issue.id, hours: 1, activity_id: 9, spent_on: Date.today, comments: 'Actual time entry')
+
+    issue.reload
+    issue.stubs(:journals).returns([])
+
+    content = @service.prepare_issue_content(issue)
+    assert_includes content, "Issue ##{issue.id} - Time Entry Test"
+    assert_includes content, "Description: Time entry test desc"
+    assert_includes content, "Time entry note: Actual time entry"
+    assert_equal 1, content.scan(/Time entry note:/).count
+    assert_equal 4, content.lines.count
+  end
+
+  def test_base_url_uses_setting_if_present
+    original_settings = Setting.plugin_redmine_semantic_search
+    custom_url = "http://localhost:8080/v1"
+    Setting.plugin_redmine_semantic_search = { "base_url" => custom_url }
+
+    OpenAI::Client.expects(:new).with(access_token: 'test_api_key', uri_base: custom_url).returns(mock('OpenAI::Client'))
+    service = EmbeddingService.new
+    assert_not_nil service, "Service should be initialized"
+  ensure
+    Setting.plugin_redmine_semantic_search = original_settings
+    OpenAI::Client.unstub(:new)
+    OpenAI::Client.stubs(:new).returns(@mock_client)
+  end
+
+  def test_base_url_uses_default_if_setting_not_present
+    original_settings = Setting.plugin_redmine_semantic_search
+    Setting.plugin_redmine_semantic_search = {}
+    default_url = "https://api.openai.com/v1"
+
+    OpenAI::Client.expects(:new).with(access_token: 'test_api_key', uri_base: default_url).returns(mock('OpenAI::Client'))
+    service = EmbeddingService.new
+    assert_not_nil service, "Service should be initialized"
+  ensure
+    Setting.plugin_redmine_semantic_search = original_settings
+    OpenAI::Client.unstub(:new)
+    OpenAI::Client.stubs(:new).returns(@mock_client)
+  end
+
+  def test_base_url_uses_default_if_setting_is_nil
+    original_settings = Setting.plugin_redmine_semantic_search
+    Setting.plugin_redmine_semantic_search = nil
+    default_url = "https://api.openai.com/v1"
+
+    OpenAI::Client.expects(:new).with(access_token: 'test_api_key', uri_base: default_url).returns(mock('OpenAI::Client'))
+    service = EmbeddingService.new
+    assert_not_nil service, "Service should be initialized"
+  ensure
+    Setting.plugin_redmine_semantic_search = original_settings
+    OpenAI::Client.unstub(:new)
+    OpenAI::Client.stubs(:new).returns(@mock_client)
+  end
 end

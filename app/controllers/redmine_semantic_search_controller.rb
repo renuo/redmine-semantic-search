@@ -24,12 +24,8 @@ class RedmineSemanticSearchController < ApplicationController
   def sync_embeddings
     issue_count = Issue.count
 
-    if Setting.plugin_redmine_semantic_search["enabled"] == "1"
-      SyncEmbeddingsJob.perform_later
-      flash[:notice] = l(:notice_redmine_semantic_search_sync_embeddings_started, count: issue_count)
-    else
-      flash[:error] = l(:error_redmine_semantic_search_plugin_disabled)
-    end
+    SyncEmbeddingsJob.perform_later
+    flash[:notice] = l(:notice_redmine_semantic_search_sync_embeddings_started, count: issue_count)
 
     redirect_back(fallback_location: { controller: "issues", action: "index" })
   end
