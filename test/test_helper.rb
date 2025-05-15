@@ -2,6 +2,22 @@ require File.expand_path(File.dirname(__FILE__) + '/../../../test/test_helper')
 
 require 'mocha/minitest'
 
+require 'simplecov'
+
+SimpleCov.start do
+  add_filter 'test'
+  add_filter 'plugins/redmine_semantic_search/init.rb'
+  add_filter 'plugins/redmine_semantic_search/lib/redmine_semantic_search/'
+  add_filter 'plugins/redmine_semantic_search/db/migrate/'
+  add_filter 'plugins/redmine_semantic_search/config/'
+  enable_coverage :branch
+  minimum_coverage line: 100, branch: 100
+  add_filter do |source_file|
+    !source_file.filename.include?('plugins/redmine_semantic_search')
+  end
+  track_files 'plugins/redmine_semantic_search/**/*.rb'
+end
+
 ActiveJob::Base.queue_adapter = :test
 
 class EmbeddingServiceMock

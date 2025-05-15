@@ -60,4 +60,33 @@ class IssueEmbeddingJobTest < ActiveSupport::TestCase
     assert_equal original_embedding.id, updated_embedding.id
     assert_equal original_embedding.content_hash, updated_embedding.content_hash
   end
+
+  def test_job_does_nothing_if_issue_not_found
+    Setting.plugin_redmine_semantic_search = {
+      "enabled" => "1",
+      "embedding_model" => "text-embedding-ada-002"
+    }
+
+    job = IssueEmbeddingJob.new
+    job.perform(9999)
+
+    assert_nil IssueEmbedding.find_by(issue_id: 9999)
+  end
+
+  def test_job_handles_embedding_generation_failure
+    Setting.plugin_redmine_semantic_search = {
+      "enabled" => "1",
+      "embedding_model" => "text-embedding-ada-002"
+    }
+
+    @embedding_service_mock.stubs(:generate_embedding).raises(StandardError.new("Test error"))
+
+    job = IssueEmbeddingJob.new
+    assert_raises StandardError do
+      job.perform(@issue.id)
+    end
+
+    embedding = IssueEmbedding.find_by(issue_id: @issue.id)
+    assert_nil embedding
+  end
 end

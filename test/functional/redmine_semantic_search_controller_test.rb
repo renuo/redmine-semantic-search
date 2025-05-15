@@ -51,6 +51,17 @@ class RedmineSemanticSearchControllerTest < Redmine::ControllerTest
     assert_select 'dl#search-results-list dt', 1, "No search result items found"
   end
 
+  def test_index_handles_embedding_error
+    search_service = mock('RedmineSemanticSearchService')
+    search_service.stubs(:search).raises(EmbeddingService::EmbeddingError.new("Test embedding error"))
+    RedmineSemanticSearchService.stubs(:new).returns(search_service)
+
+    get :index, params: { q: 'test query' }
+    assert_response :success
+    assert_equal "Test embedding error", flash[:error]
+    assert_template layout: "base"
+  end
+
   def test_sync_embeddings_when_enabled
     assert_enqueued_with(job: SyncEmbeddingsJob) do
       post :sync_embeddings

@@ -34,7 +34,6 @@
       <dl id="search-results-list" class="search-results">
         <% @results.each do |result| %>
           <% issue_id = result['issue_id'] %>
-          <%# Render issue details here %>
           <%= render 'redmine_semantic_search/issue_details', issue: result %>
         <% end %>
       </dl>
