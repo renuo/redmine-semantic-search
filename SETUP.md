@@ -49,6 +49,15 @@ If you are running the standard Rails development server, you can typically stop
 RAILS_ENV=production bundle exec rails server
 ```
 
+> [!IMPORTANT]
+> The semantic search plugin is disabled by default, so make sure to enable it in the [plugin settings](http://localhost:3000/settings/plugin/redmine_semantic_search).
+
+Now, yhou can start assigning roles & permissions, to who can use the semantic search (this includes the syncing of all existing issues).
+
+You can do this in by going to the Role you want to change the permissions for, then selecting the checkbox "Use semantic search" under the section "Redmine semantic search":
+
+![Checkbox Showcase](repo/checkbox-showcase.gif)
+
 # Setting up Redmine
 
 If you haven't set up Redmine, refer to this guide.
@@ -93,6 +102,9 @@ test:
   encoding: unicode
 ```
 
+> [!TIP]
+> If you face any issues with the Postgres Database Setup, try pasting [this](repo/backup_database.yml) into `config/database.yml` instead.
+
 4. Now set the local ruby version to 3.2.8.
 
 ```bash
@@ -124,20 +136,3 @@ RAILS_ENV=production bundle exec rails server
 8. Visit `http://localhost:3000` in your browser, and enter `admin` as the login and `admin` as the password.
 
 9. Next you will be prompted to change your password, choose one and write it down for later.
-
-## Ollama setup
-
-```bash
-brew install ollama
-brew services start ollama
-ollama pull nomic-embed-text:latest
-ollama serve
-```
-
-# Todo:
-
-- [ ] Add bin/setup script
-- [ ] Guide to add test data
-- [ ] Tell that it's disabled by default
-- [ ] Remove useless checkboxes
-- [ ] Let user know about how to configure ollama
