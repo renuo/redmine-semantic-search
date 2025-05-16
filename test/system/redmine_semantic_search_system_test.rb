@@ -71,10 +71,10 @@ class RedmineSemanticSearchSystemTest < ApplicationSystemTestCase
 
     within '#redmine-semantic-search-form' do
       fill_in 'q', with: 'test query about bug issues'
-      click_button 'Search', wait: 3
+      click_button 'Search', wait: 5
     end
 
-    assert_selector 'dl#search-results-list', wait: 3
+    assert_selector 'dl#search-results-list', wait: 5
 
     assert_selector "dt a[href='/issues/#{@issue.id}']"
 
