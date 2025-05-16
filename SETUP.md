@@ -164,3 +164,6 @@ RAILS_ENV=production bundle exec rails server
 9. Next you will be prompted to change your password, choose one and write it down for later.
 
 10. As of now, it is recommended to create a project and add a couple of issues to it, so testing the Semantic Search actually becomes feasible.
+
+> [!TIP]
+> If you don't want to go through the hassle of manually adding issues, you can also use the `redmine_sample_data` plugin, which adds Random Data to your Redmine Instance (will delete all other data). Check out the instructions [here](https://github.com/alexandermeindl/redmine_sample_data).
