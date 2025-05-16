@@ -24,9 +24,6 @@ Redmine::Plugin.register :redmine_semantic_search do
     "base_url" => "https://api.openai.com/v1",
     "embedding_model" => "text-embedding-ada-002",
     "search_limit" => 25,
-    "include_description" => "1",
-    "include_comments" => "1",
-    "include_time_entries" => "1"
   }, partial: "settings/redmine_semantic_search_settings"
 
   menu :top_menu, :redmine_semantic_search,
