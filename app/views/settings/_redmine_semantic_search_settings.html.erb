@@ -39,20 +39,5 @@
       <%= text_field_tag 'settings[search_limit]', settings['search_limit'] || 25, size: 5 %>
       <em class="info"><%= l(:text_redmine_semantic_search_search_limit_info) %></em>
     </p>
-
-    <p>
-      <label for="settings_include_description"><%= l(:label_redmine_semantic_search_include_description) %></label>
-      <%= check_box_tag 'settings[include_description]', '1', settings['include_description'] != '0' %>
-    </p>
-
-    <p>
-      <label for="settings_include_comments"><%= l(:label_redmine_semantic_search_include_comments) %></label>
-      <%= check_box_tag 'settings[include_comments]', '1', settings['include_comments'] != '0' %>
-    </p>
-
-    <p>
-      <label for="settings_include_time_entries"><%= l(:label_redmine_semantic_search_include_time_entries) %></label>
-      <%= check_box_tag 'settings[include_time_entries]', '1', settings['include_time_entries'] != '0' %>
-    </p>
   </div>
 </fieldset>
