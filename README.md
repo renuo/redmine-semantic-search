@@ -19,93 +19,14 @@ For the rendered Mermaid Domain Model, have a look at [this file](repo/domain_mo
 
 ## Requirements
 
-- Redmine 5.1.x or 6.0.x
-- PostgreSQL 12+ with pgvector extension installed
-- Ruby 3.2.x
+- PostgreSQL installed
 - Valid OpenAI API key
+
+More information in [Setup Guide](#installation).
 
 ## Installation
 
-### Pre-requisities
-
-You must have an up-to-date Redmine instance available locally:
-
-```bash
-g clone git@github.com:redmine/redmine.git
-cd redmine
-cp config/database.example.yml database.yml
-```
-
-Make sure to configure `database.yml` to use PostgreSQL, and not MySQL.
-
-For example:
-
-```yaml
-production:
-  adapter: postgresql
-  database: redmine
-  host: localhost
-  username: postgres
-  password: "postgres"
-  encoding: unicode
-
-development:
-  adapter: postgresql
-  database: redmine_development
-  host: localhost
-  username: postgres
-  password: "postgres"
-  encoding: unicode
-
-test:
-  adapter: postgresql
-  database: redmine_test
-  host: localhost
-  username: postgres
-  password: "postgres"
-  encoding: unicode
-```
-
-### 1. Install PostgreSQL and the pgvector extension
-
-On macOS, you can use Homebrew:
-
-```bash
-brew install postgresql pgvector
-```
-
-### 2. Enable the extension in your database
-
-```sql
-CREATE EXTENSION IF NOT EXISTS vector;
-```
-
-### 3. Install the plugin
-
-From your Redmine installation directory:
-
-```bash
-cd plugins
-git clone https://github.com/renuo/redmine-semantic-search.git semantic_search
-cd ..
-bundle install
-RAILS_ENV=production bin/rake redmine:plugins:migrate
-```
-
-### 4. Set up the OpenAI API key
-
-Configure your environment variableby copying `.env.example`:
-
-```bash
-cp .env.example .env
-vim .env
-```
-
-### 5. Restart your Redmine application
-
-```bash
-touch tmp/restart.txt # or just ctrl-c and rerun
-```
+Check out [SETUP.md](SETUP.md) for a step-by-step guide on how to set the Plugin up.
 
 ## Configuration
 
@@ -128,10 +49,6 @@ touch tmp/restart.txt # or just ctrl-c and rerun
 3. When a search is performed, the query is converted to an embedding
 4. PostgreSQL's vector similarity search finds the most semantically similar issues
 5. Results are filtered based on user permissions
-
-## Development
-
-Once you have setup the Redmine Instance with
 
 ## Testing
 
