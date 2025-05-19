@@ -122,6 +122,7 @@ class RedmineSemanticSearchSystemTest < ApplicationSystemTestCase
     new_password = 'SecureP@ssw0rd1'
     admin_user.password = new_password
     admin_user.password_confirmation = new_password
+    admin_user.status = User::STATUS_ACTIVE
     if admin_user.respond_to?(:must_change_passwd) && admin_user.must_change_passwd
       admin_user.must_change_passwd = false
     end
@@ -131,7 +132,7 @@ class RedmineSemanticSearchSystemTest < ApplicationSystemTestCase
     unless save_result
       puts "DEBUG: admin_user.errors: #{admin_user.errors.full_messages.join(', ')}"
     end
-    admin_user.reload # Ensure we have the latest from DB if save was successful
+    admin_user.reload
     puts "DEBUG: After save & reload: Login=#{admin_user.login}, Status=#{admin_user.status}, Admin?=#{admin_user.admin?}, MustChangePasswd?=#{admin_user.must_change_passwd if admin_user.respond_to?(:must_change_passwd)}"
 
     log_user(admin_user.login, new_password)
