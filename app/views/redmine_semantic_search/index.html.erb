@@ -24,7 +24,7 @@
 </div>
 <% end %>
 
-<% if @question.present? %>
+<% if @search_performed %>
   <div id="search-results">
     <div class="search-results-count">
       <%= l(:label_redmine_semantic_search_result_count, count: @results.size) %>
