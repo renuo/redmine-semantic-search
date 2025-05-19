@@ -16,24 +16,6 @@ class ApplicationSystemTestCase < ActionDispatch::SystemTestCase
     fill_in 'username', with: login
     fill_in 'password', with: password
     click_button 'Login', wait: 5
-
-    # Enhanced debugging for login failure
-    unless page.has_css?('#loggedas', wait: 0.1) # Quick check, real wait is in assert_selector
-      puts "DEBUG: Login failed for user '#{login}'. Current URL: #{current_url}"
-      puts "DEBUG: Current page HTML snapshot (also saved to tmp/capybara/login_failure.html):"
-      puts page.html
-      # Ensure tmp/capybara directory exists
-      FileUtils.mkdir_p(Rails.root.join('tmp/capybara'))
-      save_page Rails.root.join('tmp/capybara/login_failure.html')
-      # It might also be useful to see if there are any flash error messages
-      if page.has_css?('#errorExplanation')
-        puts "DEBUG: Found #errorExplanation: #{find('#errorExplanation').text}"
-      end
-      if page.has_css?('.flash.error')
-        puts "DEBUG: Found .flash.error: #{find('.flash.error').text}"
-      end
-    end
-
     assert_selector '#loggedas', wait: 5
   end
 

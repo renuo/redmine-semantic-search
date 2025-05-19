@@ -74,21 +74,6 @@ class RedmineSemanticSearchSystemTest < ApplicationSystemTestCase
       click_button 'Search', wait: 5
     end
 
-    # Enhanced debugging for search results
-    unless page.has_css?('dl#search-results-list', wait: 0.1) # Quick check
-      puts "DEBUG: Search results list (dl#search-results-list) not found. Current URL: #{current_url}"
-      puts "DEBUG: Current page HTML snapshot (also saved to tmp/capybara/search_results_failure.html):"
-      puts page.html
-      FileUtils.mkdir_p(Rails.root.join('tmp/capybara'))
-      save_page Rails.root.join('tmp/capybara/search_results_failure.html')
-      if page.has_css?('#errorExplanation')
-        puts "DEBUG: Found #errorExplanation: #{find('#errorExplanation').text}"
-      end
-      if page.has_css?('.flash.error')
-        puts "DEBUG: Found .flash.error: #{find('.flash.error').text}"
-      end
-    end
-
     assert_selector 'dl#search-results-list', wait: 5
 
     assert_selector "dt a[href='/issues/#{@issue.id}']"
@@ -111,10 +96,6 @@ class RedmineSemanticSearchSystemTest < ApplicationSystemTestCase
       click_button 'Search', wait: 3
     end
 
-    unless page.has_css?('p.nodata', wait: 3)
-      puts "DEBUG: p.nodata not found. Current page body:"
-      puts page.body
-    end
     assert_selector 'p.nodata', wait: 3
   end
 
@@ -133,8 +114,6 @@ class RedmineSemanticSearchSystemTest < ApplicationSystemTestCase
     Capybara.reset_sessions!
 
     admin_user = User.find(1)
-    puts "DEBUG: Admin user found: ID=#{admin_user.id}, Login=#{admin_user.login}, Status=#{admin_user.status}, Admin?=#{admin_user.admin?}, MustChangePasswd?=#{admin_user.must_change_passwd if admin_user.respond_to?(:must_change_passwd)}"
-
     new_password = 'SecureP@ssw0rd1'
     admin_user.password = new_password
     admin_user.password_confirmation = new_password
@@ -143,13 +122,8 @@ class RedmineSemanticSearchSystemTest < ApplicationSystemTestCase
       admin_user.must_change_passwd = false
     end
 
-    save_result = admin_user.save
-    puts "DEBUG: admin_user.save result: #{save_result}"
-    unless save_result
-      puts "DEBUG: admin_user.errors: #{admin_user.errors.full_messages.join(', ')}"
-    end
+    admin_user.save
     admin_user.reload
-    puts "DEBUG: After save & reload: Login=#{admin_user.login}, Status=#{admin_user.status}, Admin?=#{admin_user.admin?}, MustChangePasswd?=#{admin_user.must_change_passwd if admin_user.respond_to?(:must_change_passwd)}"
 
     log_user(admin_user.login, new_password)
 
