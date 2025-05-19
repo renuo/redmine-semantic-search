@@ -38,7 +38,9 @@ jobs:
         uses: actions/cache@v3
         with:
           path: redmine
-          key: redmine-${{ matrix.redmine_version }}
+          key: redmine-${{ matrix.redmine_version }}-${{ github.sha }}
+          restore-keys: |
+            redmine-${{ matrix.redmine_version }}-
 
       - name: Checkout redmine repository
         if: steps.cache-redmine.outputs.cache-hit != 'true'
