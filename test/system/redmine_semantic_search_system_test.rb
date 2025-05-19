@@ -115,6 +115,7 @@ class RedmineSemanticSearchSystemTest < ApplicationSystemTestCase
 
   test "top_menu_item_is_hidden_when_plugin_is_disabled" do
     logout
+    Capybara.reset_sessions!
 
     admin_user = User.find(1)
     puts "DEBUG: Admin user found: ID=#{admin_user.id}, Login=#{admin_user.login}, Status=#{admin_user.status}, Admin?=#{admin_user.admin?}, MustChangePasswd?=#{admin_user.must_change_passwd if admin_user.respond_to?(:must_change_passwd)}"
