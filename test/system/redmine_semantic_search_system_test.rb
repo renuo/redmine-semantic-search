@@ -112,7 +112,8 @@ class RedmineSemanticSearchSystemTest < ApplicationSystemTestCase
   test "top_menu_item_is_hidden_when_plugin_is_disabled" do
     logout
 
-    log_user('admin', 'admin')
+    admin_user = User.find(1)
+    log_user(admin_user.login, 'admin')
 
     Setting.plugin_redmine_semantic_search = Setting.plugin_redmine_semantic_search.merge('enabled' => '0')
 
