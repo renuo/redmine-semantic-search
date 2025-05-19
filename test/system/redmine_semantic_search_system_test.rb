@@ -96,6 +96,10 @@ class RedmineSemanticSearchSystemTest < ApplicationSystemTestCase
       click_button 'Search', wait: 3
     end
 
+    unless page.has_css?('p.nodata', wait: 3)
+      puts "DEBUG: p.nodata not found. Current page body:"
+      puts page.body
+    end
     assert_selector 'p.nodata', wait: 3
   end
 
