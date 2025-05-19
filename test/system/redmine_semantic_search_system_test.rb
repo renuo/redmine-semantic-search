@@ -74,6 +74,21 @@ class RedmineSemanticSearchSystemTest < ApplicationSystemTestCase
       click_button 'Search', wait: 5
     end
 
+    # Enhanced debugging for search results
+    unless page.has_css?('dl#search-results-list', wait: 0.1) # Quick check
+      puts "DEBUG: Search results list (dl#search-results-list) not found. Current URL: #{current_url}"
+      puts "DEBUG: Current page HTML snapshot (also saved to tmp/capybara/search_results_failure.html):"
+      puts page.html
+      FileUtils.mkdir_p(Rails.root.join('tmp/capybara'))
+      save_page Rails.root.join('tmp/capybara/search_results_failure.html')
+      if page.has_css?('#errorExplanation')
+        puts "DEBUG: Found #errorExplanation: #{find('#errorExplanation').text}"
+      end
+      if page.has_css?('.flash.error')
+        puts "DEBUG: Found .flash.error: #{find('.flash.error').text}"
+      end
+    end
+
     assert_selector 'dl#search-results-list', wait: 5
 
     assert_selector "dt a[href='/issues/#{@issue.id}']"
