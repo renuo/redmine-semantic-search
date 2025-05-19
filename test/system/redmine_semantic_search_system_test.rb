@@ -113,6 +113,12 @@ class RedmineSemanticSearchSystemTest < ApplicationSystemTestCase
     logout
 
     admin_user = User.find(1)
+    admin_user.password = 'admin'
+    admin_user.password_confirmation = 'admin'
+    if admin_user.respond_to?(:must_change_passwd) && admin_user.must_change_passwd
+      admin_user.must_change_passwd = false
+    end
+    admin_user.save!
     log_user(admin_user.login, 'admin')
 
     Setting.plugin_redmine_semantic_search = Setting.plugin_redmine_semantic_search.merge('enabled' => '0')
