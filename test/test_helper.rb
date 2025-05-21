@@ -20,10 +20,10 @@ end
 
 ActiveJob::Base.queue_adapter = :test
 
+ActiveSupport.to_time_preserves_timezone = true
+
 class EmbeddingServiceMock
-  def initialize
-    # TODO: is no init necessary?
-  end
+  def initialize; end
 
   def generate_embedding(text)
     Array.new(2000) { 0.1 }

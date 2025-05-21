@@ -4,6 +4,7 @@ class RedmineSemanticSearchSystemTest < ApplicationSystemTestCase
   fixtures :projects, :users, :roles, :members, :member_roles, :trackers
 
   def setup
+    ActiveSupport.to_time_preserves_timezone = true
     @user = User.find_by(login: 'jsmith') || users(:users_002)
     @role = Role.find_by(name: 'Manager') || roles(:roles_001)
     @role.add_permission!(:use_semantic_search)
@@ -35,8 +36,8 @@ class RedmineSemanticSearchSystemTest < ApplicationSystemTestCase
       "subject" => @issue.subject,
       "description" => @issue.description,
       "project_name" => @project.name,
-      "created_on" => @issue.created_on.iso8601,
-      "updated_on" => @issue.updated_on.iso8601,
+      "created_on" => @issue.created_on,
+      "updated_on" => @issue.updated_on,
       "tracker_id" => @tracker.id,
       "tracker_name" => @tracker.name,
       "status_name" => @issue.status.name,
