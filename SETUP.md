@@ -73,7 +73,7 @@ Ollama allows you to run large language models locally. This is a great option f
     ```
 
 2.  **Configure Plugin Settings:**
-    Navigate to the plugin settings in Redmine (usually `http://localhost:3000/settings/plugin/redmine_semantic_search`) and enter the following details:
+    Navigate to the plugin settings in Redmine (at `http://localhost:3000/settings/plugin/redmine_semantic_search`) and enter the following details:
     *   **Base URL:** `http://localhost:11434/v1`
     *   **Embedding Model:** `nomic-embed-text:latest`
 
