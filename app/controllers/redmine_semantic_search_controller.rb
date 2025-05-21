@@ -8,10 +8,9 @@ class RedmineSemanticSearchController < ApplicationController
     @projects = Project.visible.sorted.to_a
     @question = params[:q] || ""
     @results = []
-    @search_performed = false
+    @search_performed = @question.present?
 
     if @question.present?
-      @search_performed = true
       search_service = RedmineSemanticSearchService.new
       search_limit = Setting.plugin_redmine_semantic_search["search_limit"].to_i
       @results = search_service.search(@question, User.current, search_limit)
