@@ -95,7 +95,7 @@ If you prefer to use OpenAI's models for embeddings:
     Replace `"YOUR_OPENAI_API_KEY"` with your actual key. It's recommended to add this to your shell profile (e.g., `.zshrc`, `.bashrc`) for persistence.
 
 2.  **Configure Plugin Settings:**
-    Navigate to the plugin settings in Redmine (usually `http://localhost:3000/settings/plugin/redmine_semantic_search`):
+    Navigate to the plugin settings in Redmine (at `http://localhost:3000/settings/plugin/redmine_semantic_search`):
     *   Leave the **Base URL** empty to use the default OpenAI API URL.
     *   Enter your desired **Embedding Model** (e.g., `text-embedding-ada-002`).
 
