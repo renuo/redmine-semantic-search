@@ -52,7 +52,7 @@ RAILS_ENV=production bundle exec rails server
 
 Now you can assign roles and permissions to determine who can use the semantic search feature.
 
-You can do this in by going to the Role you want to change the permissions for, then selecting the checkbox "Use semantic search" under the section "Redmine semantic search":
+You can do this in by going to the role you want to change the permissions for, then selecting the checkbox "Use semantic search" under the section "Redmine semantic search":
 
 ![Checkbox Showcase](repo/checkbox-showcase.gif)
 
