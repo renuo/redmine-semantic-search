@@ -145,6 +145,9 @@ bundle install
 
 6. In order to setup our database, we now need to create the database, then run the migrations.
 
+> [!WARNING]
+> If you already have a database called `redmine`, make sure to delete it first using `dropdb -U postgres redmine`.
+
 ```bash
 export RAILS_ENV=production
 bundle exec rake generate_secret_token
