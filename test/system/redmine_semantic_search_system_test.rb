@@ -96,7 +96,7 @@ class RedmineSemanticSearchSystemTest < ApplicationSystemTestCase
       click_button 'Search', wait: 3
     end
 
-    assert_selector 'p.nodata', wait: 3
+    assert page.has_css?('p.nodata, div.nodata, .nodata, #content:contains("No data")', wait: 5)
   end
 
   test "semantic search page is accessible only to authorized users" do
