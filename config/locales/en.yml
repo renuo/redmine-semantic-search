@@ -21,6 +21,8 @@ en:
   label_redmine_semantic_search_tracker_name: "Tracker Name"
   label_redmine_semantic_search_issue_id: "Issue ID"
 
+  label_redmine_no_data: "No data to display."
+
   button_redmine_semantic_search_sync_embeddings: "Sync Embeddings"
 
   text_redmine_semantic_search_info: "Semantic search uses AI to find issues based on meaning, not just keywords."
