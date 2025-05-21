@@ -78,7 +78,13 @@ Ollama allows you to run large language models locally. This is a great option f
     *   **Embedding Model:** `nomic-embed-text:latest`
 
 3.  **Set API Key for Ollama:**
-    For the connection to work correctly with Ollama, the environment variable `OPENAI_API_KEY` must be set to `ollama`. You can set this in your shell profile (e.g., `.zshrc`, `.bashrc`) or when starting your Redmine server:
+    For the connection to work correctly with Ollama, the `OPENAI_API_KEY` must be set to `ollama`.
+    It's recommended to create a `.env` file in your Redmine root directory and add the following line:
+    ```env
+    OPENAI_API_KEY=ollama
+    ```
+    Then, ensure your Redmine server loads this `.env` file (e.g., by using a gem like `dotenv-rails`).
+    Alternatively, you can set this in your shell profile (e.g., `.zshrc`, `.bashrc`) or when starting your Redmine server:
     ```bash
     OPENAI_API_KEY=ollama RAILS_ENV=production bundle exec rails server
     ```
@@ -88,14 +94,20 @@ Ollama allows you to run large language models locally. This is a great option f
 If you prefer to use OpenAI's models for embeddings:
 
 1.  **Ensure API Key is Set:**
-    Make sure you have your OpenAI API Key. You can set it as an environment variable:
+    Make sure you have your OpenAI API Key.
+    It's recommended to create a `.env` file in your Redmine root directory and add the following line, replacing `"YOUR_OPENAI_API_KEY"` with your actual key:
+    ```env
+    OPENAI_API_KEY="YOUR_OPENAI_API_KEY"
+    ```
+    Then, ensure your Redmine server loads this `.env` file (e.g., by using a gem like `dotenv-rails`).
+    Alternatively, you can set it as an environment variable:
     ```bash
     export OPENAI_API_KEY="YOUR_OPENAI_API_KEY"
     ```
-    Replace `"YOUR_OPENAI_API_KEY"` with your actual key. It's recommended to add this to your shell profile (e.g., `.zshrc`, `.bashrc`) for persistence.
+    It's recommended to add this to your shell profile (e.g., `.zshrc`, `.bashrc`) for persistence if not using a `.env` file.
 
 2.  **Configure Plugin Settings:**
-    Navigate to the plugin settings in Redmine (at `http://localhost:3000/settings/plugin/redmine_semantic_search`):
+    Navigate to the plugin settings in Redmine (at `http://localhost:3000/settings/plugin/redmine_semantic_search`) and enter the following details:
     *   Leave the **Base URL** empty to use the default OpenAI API URL.
     *   Enter your desired **Embedding Model** (e.g., `text-embedding-ada-002`).
 
@@ -117,6 +129,32 @@ Once you've configured your chosen embedding provider:
 5.  Test the plugin by entering a keyword from the previously created issues. The relevant issues should appear in the search results with an according similarity score.
 
 ![Search Results](repo/results.png)
+
+## Quick Data Setup for Development/Testing
+
+To quickly populate your Redmine instance with sample projects and issues for testing the Semantic Search plugin, you can use the provided setup script. This script will create two projects, each with ten relevant issues.
+
+1.  **Ensure your plugin is in the correct directory:** The `redmine_semantic_search` plugin directory must be located within your Redmine installation's `plugins` folder (e.g., `your_redmine_root/plugins/redmine_semantic_search/`).
+
+2.  **Navigate to the plugin directory:**
+    ```bash
+    cd path/to/your/redmine/plugins/redmine_semantic_search
+    ```
+
+3.  **Make the script executable (if you haven't already):**
+    ```bash
+    chmod +x bin/setup
+    ```
+
+4.  **Run the setup script:**
+    You must specify the `RAILS_ENV` (it defaults to `development`). Next, run this command:
+    ```bash
+    RAILS_ENV=production ./bin/setup
+    ```
+
+    The script will output its progress, indicating the creation of projects and issues. The output will be colorized for better readability.
+
+This will give you a good set of data to test the "Sync Embeddings" and semantic search functionalities described in the [Usage](#usage) section above.
 
 # Setting up Redmine
 
@@ -203,4 +241,4 @@ RAILS_ENV=production bundle exec rails server
 10. As of now, it is recommended to create a project and add a couple of issues to it, so testing the Semantic Search actually becomes feasible.
 
 > [!TIP]
-> If you don't want to go through the hassle of manually adding issues, you can also use the `redmine_sample_data` plugin, which adds Random Data to your Redmine Instance (will delete all other data). Check out the instructions [here](https://github.com/alexandermeindl/redmine_sample_data).
+> If you don't want to go through the hassle of manually creating projects & issues, you can use the `bin/setup` script as described in the [Quick Data Setup for Development/Testing](#quick-data-setup-for-developmenttesting) section.

@@ -1,0 +1,49 @@
+#!/bin/bash
+
+set -e
+
+command_exists() {
+  command -v "$1" >/dev/null 2>&1
+}
+
+PLUGIN_BIN_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+
+REDMINE_ROOT="$(cd "${PLUGIN_BIN_DIR}/../../.." && pwd)"
+
+if [ ! -f "${REDMINE_ROOT}/Gemfile" ]; then
+  echo "Error: Could not determine Redmine root directory. Expected Gemfile at ${REDMINE_ROOT}/Gemfile"
+  echo "Please ensure your plugin is in the correct Redmine plugins directory structure (e.g., redmine/plugins/your_plugin)."
+  exit 1
+fi
+
+echo "Redmine root identified as: ${REDMINE_ROOT}"
+
+if ! command_exists ruby; then
+  echo "Error: Ruby is not installed. Please install Ruby to continue." >&2
+  exit 1
+fi
+
+if ! command_exists bundle; then
+  echo "Bundler is not installed. Attempting to install bundler..."
+  gem install bundler --no-document
+  if ! command_exists bundle; then
+      echo "Error: Failed to install Bundler. Please install it manually." >&2
+      exit 1
+  fi
+fi
+
+cd "${REDMINE_ROOT}"
+
+echo "Changed directory to ${REDMINE_ROOT}"
+
+echo "Ensuring Redmine gems are installed (running bundle install)..."
+bundle check || bundle install
+
+RAKE_TASK="redmine_semantic_search:setup_dev_data"
+RAILS_ENV="${RAILS_ENV:-development}"
+
+echo "Running Rake task '${RAKE_TASK}' in RAILS_ENV=${RAILS_ENV}..."
+
+DISABLE_SPRING=1 bundle exec rake "${RAKE_TASK}" RAILS_ENV="${RAILS_ENV}"
+
+echo "Setup complete. '${RAKE_TASK}' has been executed."
