@@ -48,7 +48,7 @@ class RedmineSemanticSearchSystemTest < ApplicationSystemTestCase
 
     RedmineSemanticSearchService.any_instance.stubs(:search).returns(mock_result)
 
-    Setting.plugin_redmine_semantic_search = { "enabled" => "1" }
+    Setting.plugin_redmine_semantic_search = { "enabled" => "1", "search_limit" => "10" }
 
     RedmineSemanticSearchController.any_instance.stubs(:check_if_enabled).returns(true)
 
@@ -71,7 +71,7 @@ class RedmineSemanticSearchSystemTest < ApplicationSystemTestCase
 
     within '#redmine-semantic-search-form' do
       fill_in 'q', with: 'test query about bug issues'
-      click_button 'Search', wait: 5
+      click_button 'Search'
     end
 
     assert_selector 'dl#search-results-list', wait: 5
