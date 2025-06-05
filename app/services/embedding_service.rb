@@ -60,7 +60,7 @@ class EmbeddingService
 
   def api_key
     key = ENV.fetch("OPENAI_API_KEY", nil)
-    raise EmbeddingError, I18n.t("error_openai_api_key_required") if key.blank?
+    raise EmbeddingError, I18n.t("error_redmine_semantic_search_openai_api_key_required") if key.blank?
 
     key
   end
